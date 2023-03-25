@@ -30,16 +30,17 @@ void createTable(string fileName, connection *C){
 }
 
 
-void insertColor(string fileName, connection *C){
-  string line, name;
-  int color_id;
+void insertAccount(string fileName, connection *C){
+  string line;
+  int account_id;
+  float balance;
   ifstream f (fileName.c_str());
   if (f.is_open()){
       while(getline(f,line)){
         stringstream ss;
         ss << line;
-        ss >> color_id >> name;
-        add_color(C, name);
+        ss >> account_id >> balance;
+        add_account(C, account_id , balance);
       }
       f.close();
   }
@@ -48,6 +49,7 @@ void insertColor(string fileName, connection *C){
     exit(1);
   }
 }
+/*
 
 void insertState(string fileName, connection *C){
   string line, name;
@@ -113,16 +115,11 @@ void insertPlayer(string fileName, connection *C){
   }
   //cout << "insert " <<fileName<< endl;
 }
-
+*/
 int main (int argc, char *argv[]) 
 {
-
-  //Allocate & initialize a Postgres connection object
   connection *C;
-
   try{
-    //Establish a connection to the database
-    //Parameters: database name, user name, user password
     C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
     if (C->is_open()) {
     } else {
@@ -133,21 +130,13 @@ int main (int argc, char *argv[])
     cerr << e.what() << std::endl;
     return 1;
   }
-
-
   //TODO: create PLAYER, TEAM, STATE, and COLOR tables in the ACC_BBALL database
   //      load each table with rows from the provided source txt files
-  
-  deleteTable(C, "COLOR");
-
-  createTable("colorTable.txt", C);
-
-  
-  insertColor("color.txt", C);
-
+  deleteTable(C, "ACCOUNT");
+  createTable("account.sql", C);
+  insertAccount("account.txt", C);
   //Close database connection
   C->disconnect();
-
   return 0;
 }
 

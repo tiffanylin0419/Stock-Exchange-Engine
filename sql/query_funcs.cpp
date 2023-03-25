@@ -10,7 +10,7 @@ void runSQL(string sql, connection *C){
   W.commit();
 }
 
-
+/*
 void add_player(connection *C, int team_id, int jersey_num, string first_name, string last_name,
                 int mpg, int ppg, int rpg, int apg, double spg, double bpg)
 {
@@ -53,15 +53,15 @@ void add_state(connection *C, string name)
   W.commit();
 }
 
-
-void add_color(connection *C, string name)
+*/
+void add_account(connection *C, int account_id, float balance)
 {
   work W(*C);
-  string sql = "INSERT INTO COLOR (NAME) VALUES (" + W.quote(name) + ");";
+  string sql = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" + std::to_string(account_id) + "," + std::to_string(balance) + ");";
   W.exec(sql);
   W.commit();
 }
-
+/*
 void addSizeCondition(string * sql, int use, bool* notFiltered, string name, int min, int max){
   if(use){
     if(*notFiltered){
@@ -86,11 +86,7 @@ void addSizeCondition(string * sql, int use, bool* notFiltered, string name, dou
     sql->append(name+" >= "+to_string(min)+" AND "+name+" <= "+to_string(max)+" ");
   }
 }
-/*
- * All use_ params are used as flags for corresponding attributes
- * a 1 for a use_ param means this attribute is enabled (i.e. a WHERE clause is needed)
- * a 0 for a use_ param means this attribute is disabled
- */
+
 void query1(connection *C,
   int use_mpg, int min_mpg, int max_mpg,
   int use_ppg, int min_ppg, int max_ppg,
@@ -192,3 +188,4 @@ void query5(connection *C, int num_wins)
     cout << c[3].as<int>() << endl;
   }
 }
+*/
