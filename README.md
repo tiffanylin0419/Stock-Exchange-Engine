@@ -9,6 +9,15 @@ sudo apt install make
 sudo apt install emacs
 sudo apt install postgresql postgresql-contrib libpqxx-devmake
 ```
+
+postgres command
+```
+sudo su - postgres
+psql
+ALTER USER postgres PASSWORD 'passw0rd';
+CREATE DATABASE "EXCHANGE_SERVER";
+```
+
 go to /etc/postgresql/12/main/
 ```
 sudo emacs pg_hba.conf
@@ -21,11 +30,8 @@ local all postgres md5
 sudo service postgresql restart
 ```
 
-postgres command
-sudo su - postgres
-psql
-ALTER USER postgres PASSWORD 'passw0rd';
-CREATE DATABASE "EXCHANGE_SERVER";
+
+
 
 ## Tables
 ACCOUNT: ACCOUNT_ID BALANCE
