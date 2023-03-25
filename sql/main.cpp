@@ -2,16 +2,14 @@
 #include <pqxx/pqxx>
 #include <fstream>
 
-#include "exerciser.h"
+#include "query_funcs.h"
 
 using namespace std;
 using namespace pqxx;
 
-
 void deleteTable(connection *C, string tableName){
   string sql = "DROP TABLE IF EXISTS " + tableName + " CASCADE;";
   runSQL(sql,C);
-  //cout<<"delete table "+tableName<<endl;
 }
 
 void createTable(string fileName, connection *C){
@@ -29,7 +27,6 @@ void createTable(string fileName, connection *C){
     exit(1);
   }
   runSQL(sql,C);
-  //cout<<"create table "+fileName<<endl;
 }
 
 
@@ -50,7 +47,6 @@ void insertColor(string fileName, connection *C){
     cout << "Cannot open " + fileName <<endl;
     exit(1);
   }
-  //cout << "insert " <<fileName<< endl;
 }
 
 void insertState(string fileName, connection *C){
@@ -127,9 +123,8 @@ int main (int argc, char *argv[])
   try{
     //Establish a connection to the database
     //Parameters: database name, user name, user password
-    C = new connection("dbname=ACC_BBALL user=postgres password=passw0rd");
+    C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
     if (C->is_open()) {
-      //cout << "Opened database successfully: " << C->dbname() << endl;
     } else {
       cout << "Can't open database" << endl;
       return 1;
@@ -144,22 +139,11 @@ int main (int argc, char *argv[])
   //      load each table with rows from the provided source txt files
   
   deleteTable(C, "COLOR");
-  deleteTable(C, "STATE");
-  deleteTable(C, "TEAM");
-  deleteTable(C, "PLAYER");
 
   createTable("colorTable.txt", C);
-  createTable("stateTable.txt", C);
-  createTable("teamTable.txt", C);
-  createTable("playerTable.txt", C);
 
   
   insertColor("color.txt", C);
-  insertState("state.txt", C);
-  insertTeam("team.txt", C);
-  insertPlayer("player.txt", C); 
-
-  exercise(C);
 
   //Close database connection
   C->disconnect();
