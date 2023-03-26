@@ -33,16 +33,22 @@ void createTable(string fileName, connection *C){
   runSQL(sql,C);
 }
 
-void add_account(connection *C, int account_id, float balance){
+string add_account(connection *C, int account_id, float balance){
   work W(*C);
-  string sql = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" 
+  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ W.quote(account_id);
+  result R( W.exec( sql1 ));
+  if(R.size()!=0){
+    return "<error id=\""+std::to_string(account_id)+"\">Account already exists.</error>\n";
+  }
+  string sql2 = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" 
                 + std::to_string(account_id) + "," 
                 + std::to_string(balance) + ");";
-  W.exec(sql);
+  W.exec(sql2);
   W.commit();
+  return "<created id=\""+std::to_string(account_id)+"\"/>\n";
 }
 
-void add_stock(connection *C, int account_id, string symbol, int amount){
+string add_stock(connection *C, int account_id, string symbol, int amount){
   work W(*C);
   string sql = "INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
                 + std::to_string(account_id) + "," 
@@ -50,9 +56,10 @@ void add_stock(connection *C, int account_id, string symbol, int amount){
                 + std::to_string(amount) + ");";
   W.exec(sql);
   W.commit();
+  return "";
 }
 
-void add_order(connection *C, int account_id, string symbol, int amount, float price, string states){
+string add_order(connection *C, int account_id, string symbol, int amount, float price, string states){
   work W(*C);
   string type= "buy";
   if(price<0){
@@ -69,6 +76,7 @@ void add_order(connection *C, int account_id, string symbol, int amount, float p
                 + "NOW());";
   W.exec(sql);
   W.commit();
+  return "";
 }
 
 /*

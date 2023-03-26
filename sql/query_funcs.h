@@ -12,9 +12,9 @@ using namespace pqxx;
 void deleteTable(connection *C, string tableName);
 void createTable(string fileName, connection *C);
 
-void add_account(connection *C, int account_id, float balance);
-void add_stock(connection *C, int account_id, string symbol, int amount);
-void add_order(connection *C, int account_id, string symbol, int amount, float price, string states);
+string add_account(connection *C, int account_id, float balance);
+string add_stock(connection *C, int account_id, string symbol, int amount);
+string add_order(connection *C, int account_id, string symbol, int amount, float price, string states);
 
 /*
 void insertAccount(string fileName, connection *C);
