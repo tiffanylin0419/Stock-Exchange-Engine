@@ -29,7 +29,6 @@ void createTable(string fileName, connection *C){
   runSQL(sql,C);
 }
 
-
 void insertAccount(string fileName, connection *C){
   string line;
   int account_id;
@@ -49,18 +48,17 @@ void insertAccount(string fileName, connection *C){
     exit(1);
   }
 }
-/*
 
-void insertState(string fileName, connection *C){
-  string line, name;
-  int state_id;
+void insertStock(string fileName, connection *C){
+  string line, symbol;
+  int account_id, amount;
   ifstream f (fileName.c_str());
   if (f.is_open()){
       while(getline(f,line)){
         stringstream ss;
         ss << line;
-        ss >> state_id >> name;
-        add_state(C, name);
+        ss >> account_id >> symbol >> amount;
+        add_stock(C, account_id, symbol, amount);
       }
       f.close();
   }
@@ -68,20 +66,19 @@ void insertState(string fileName, connection *C){
     cout << "Cannot open " + fileName <<endl;
     exit(1);
   }
-  //cout << "insert " <<fileName<< endl;
 }
 
-void insertTeam(string fileName, connection *C){
-  //string name, int state_id, int color_id, int wins, int losses
-  string line, name;
-  int team_id, state_id, color_id, wins, losses;
+void insertOrder(string fileName, connection *C){
+  string line, symbol, states;
+  int account_id, amount;
+  float price;
   ifstream f (fileName.c_str());
   if (f.is_open()){
       while(getline(f,line)){
         stringstream ss;
         ss << line;
-        ss >> team_id >> name >> state_id >> color_id >> wins >> losses;
-        add_team(C, name, state_id, color_id, wins, losses);
+        ss >> account_id >> symbol >> amount >> price >> states;
+        add_order(C, account_id, symbol, amount, price, states);
       }
       f.close();
   }
@@ -89,33 +86,8 @@ void insertTeam(string fileName, connection *C){
     cout << "Cannot open " + fileName <<endl;
     exit(1);
   }
-  //cout << "insert " <<fileName<< endl;
 }
 
-
-void insertPlayer(string fileName, connection *C){
-  //connection *C, int team_id, int jersey_num, string first_name, string last_name,
-  //int mpg, int ppg, int rpg, int apg, double spg, double bpg)
-  string line, first_name, last_name;
-  int player_id, team_id, jersey_num, mpg, ppg, rpg, apg;
-  double spg, bpg;
-  ifstream f (fileName.c_str());
-  if (f.is_open()){
-      while(getline(f,line)){
-        stringstream ss;
-        ss << line;
-        ss >> player_id >> team_id >> jersey_num >> first_name >> last_name >> mpg >> ppg >> rpg >> apg >> spg >> bpg;
-        add_player(C, team_id, jersey_num, first_name, last_name, mpg, ppg, rpg, apg, spg, bpg);
-      }
-      f.close();
-  }
-  else{
-    cout << "Cannot open " + fileName <<endl;
-    exit(1);
-  }
-  //cout << "insert " <<fileName<< endl;
-}
-*/
 int main (int argc, char *argv[]) 
 {
   connection *C;
@@ -133,9 +105,14 @@ int main (int argc, char *argv[])
   //TODO: create PLAYER, TEAM, STATE, and COLOR tables in the ACC_BBALL database
   //      load each table with rows from the provided source txt files
   deleteTable(C, "ACCOUNT");
+  deleteTable(C, "STOCK");
+  deleteTable(C, "ORDERS");
   createTable("account.sql", C);
+  createTable("stock.sql", C);
+  createTable("order.sql", C);
   insertAccount("account.txt", C);
-  //Close database connection
+  insertStock("stock.txt", C);
+  insertOrder("order.txt", C);
   C->disconnect();
   return 0;
 }

@@ -10,6 +10,43 @@ void runSQL(string sql, connection *C){
   W.commit();
 }
 
+void add_account(connection *C, int account_id, float balance){
+  work W(*C);
+  string sql = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" 
+                + std::to_string(account_id) + "," 
+                + std::to_string(balance) + ");";
+  W.exec(sql);
+  W.commit();
+}
+
+void add_stock(connection *C, int account_id, string symbol, int amount){
+  work W(*C);
+  string sql = "INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
+                + std::to_string(account_id) + "," 
+                + W.quote(symbol) + "," 
+                + std::to_string(amount) + ");";
+  W.exec(sql);
+  W.commit();
+}
+
+void add_order(connection *C, int account_id, string symbol, int amount, float price, string states){
+  work W(*C);
+  string type= "buy";
+  if(price<0){
+    type="sell";
+    price=-price;
+  }
+  string sql = "INSERT INTO ORDERS (ACCOUNT_ID, SYMBOL, AMOUNT, PRICE, TYPES, STATES, TIME) VALUES (" 
+                + std::to_string(account_id) + "," 
+                + W.quote(symbol) + "," 
+                + std::to_string(amount) + "," 
+                + std::to_string(price) + "," 
+                + W.quote(type) + "," 
+                + W.quote(states) + "," 
+                + "NOW());";
+  W.exec(sql);
+  W.commit();
+}
 /*
 void add_player(connection *C, int team_id, int jersey_num, string first_name, string last_name,
                 int mpg, int ppg, int rpg, int apg, double spg, double bpg)
@@ -54,13 +91,7 @@ void add_state(connection *C, string name)
 }
 
 */
-void add_account(connection *C, int account_id, float balance)
-{
-  work W(*C);
-  string sql = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" + std::to_string(account_id) + "," + std::to_string(balance) + ");";
-  W.exec(sql);
-  W.commit();
-}
+
 /*
 void addSizeCondition(string * sql, int use, bool* notFiltered, string name, int min, int max){
   if(use){

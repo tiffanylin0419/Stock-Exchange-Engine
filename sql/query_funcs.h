@@ -10,10 +10,9 @@ using namespace pqxx;
 
 
 void runSQL(string sql, connection *C);
-
-
 void add_account(connection *C, int account_id, float balance);
-
+void add_stock(connection *C, int account_id, string symbol, int amount);
+void add_order(connection *C, int account_id, string symbol, int amount, float price, string state);
 /*
  * All use_ params are used as flags for corresponding attributes
  * a 1 for a use_ param means this attribute is enabled (i.e. a WHERE clause is needed)

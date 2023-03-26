@@ -1,10 +1,16 @@
-CREATE TABLE ORDER(
+DROP TYPE IF EXISTS state_option;
+DROP TYPE IF EXISTS type_option;
+CREATE TYPE state_option AS ENUM ('open', 'execute', 'cancel');
+CREATE TYPE type_option AS ENUM ('buy', 'sell');
+
+CREATE TABLE ORDERS(
     ORDER_ID SERIAL,
     ACCOUNT_ID INT,
     SYMBOL VARCHAR(256),
     AMOUNT INT,
     PRICE FLOAT,
-    STATE ENUM('open', 'execute', 'cancel'),
+    TYPES type_option,
+    STATES state_option,
     TIME TIMESTAMP,
     PRIMARY KEY (ORDER_ID),
     FOREIGN KEY (ACCOUNT_ID) REFERENCES ACCOUNT(ACCOUNT_ID) ON DELETE CASCADE ON UPDATE CASCADE
