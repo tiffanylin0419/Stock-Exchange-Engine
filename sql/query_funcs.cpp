@@ -38,25 +38,30 @@ string add_account(connection *C, int account_id, float balance){
   string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ W.quote(account_id);
   result R( W.exec( sql1 ));
   if(R.size()!=0){
-    return "<error id=\""+std::to_string(account_id)+"\">Account already exists.</error>\n";
+    return "<error id=\""+to_string(account_id)+"\">Account already exists</error>\n";
   }
   string sql2 = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" 
-                + std::to_string(account_id) + "," 
-                + std::to_string(balance) + ");";
+                + to_string(account_id) + "," 
+                + to_string(balance) + ");";
   W.exec(sql2);
   W.commit();
-  return "<created id=\""+std::to_string(account_id)+"\"/>\n";
+  return "<created id=\""+to_string(account_id)+"\"/>\n";
 }
 
 string add_stock(connection *C, int account_id, string symbol, int amount){
   work W(*C);
+  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ W.quote(account_id);
+  result R( W.exec( sql1 ));
+  if(R.size()==0){
+    return "<error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
+  }
   string sql = "INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
-                + std::to_string(account_id) + "," 
+                + to_string(account_id) + "," 
                 + W.quote(symbol) + "," 
-                + std::to_string(amount) + ");";
+                + to_string(amount) + ");";
   W.exec(sql);
   W.commit();
-  return "";
+  return "<created sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
 
 string add_order(connection *C, int account_id, string symbol, int amount, float price, string states){
@@ -67,10 +72,10 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
     price=-price;
   }
   string sql = "INSERT INTO ORDERS (ACCOUNT_ID, SYMBOL, AMOUNT, PRICE, TYPES, STATES, TIME) VALUES (" 
-                + std::to_string(account_id) + "," 
+                + to_string(account_id) + "," 
                 + W.quote(symbol) + "," 
-                + std::to_string(amount) + "," 
-                + std::to_string(price) + "," 
+                + to_string(amount) + "," 
+                + to_string(price) + "," 
                 + W.quote(type) + "," 
                 + W.quote(states) + "," 
                 + "NOW());";
