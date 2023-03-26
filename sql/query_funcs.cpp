@@ -114,15 +114,11 @@ string add_buy_order(connection *C, int account_id, string symbol, int amount, f
 
   result::const_iterator c = R.begin();
   while(true){
-    if(c == R.end()){// no more to sell
-      insert_order(C, 0, account_id, symbol, amount, price, "buy", states);
+    if(amount == 0){ //done
       break;
     }
-    if(amount == c[3].as<int>()){ // buy and sell same
-      string sql2="UPDATE ORDERS \
-                  SET TIME= NOW(), STATES = 'execute'\
-                  WHERE ORDER_ID = " + to_string(c[0]) + " AND TIME = " + quoteStr(C,c[7].as<string>());
-      runSQL(sql2, C);
+    if(c == R.end()){// no more to sell
+      insert_order(C, 0, account_id, symbol, amount, price, "buy", states);
       break;
     }
     else if(amount < c[3].as<int>()){ // buy all, sell left
@@ -133,8 +129,12 @@ string add_buy_order(connection *C, int account_id, string symbol, int amount, f
       insert_order(C, c[0].as<int>(), account_id, symbol, amount, c[4].as<int>(), "sell", "execute");
       break;
     }
-    else{ // sell all, buy left
-
+    else{ // sell all
+      string sql2="UPDATE ORDERS \
+                  SET TIME= NOW(), STATES = 'execute'\
+                  WHERE ORDER_ID = " + to_string(c[0]) + " AND TIME = " + quoteStr(C,c[7].as<string>());
+      runSQL(sql2, C);
+      amount-=c[3].as<int>();
     }
     ++c;
   }

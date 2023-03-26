@@ -46,10 +46,6 @@ int main (int argc, char *argv[])
   cout << add_stock(C, 3, "c", 9);
   //add stock fail
   cout << add_stock(C, -1, "a", 3);
-  //add order
-  cout << add_order(C, 1, "d", 3, 3);
-  cout << add_order(C, 1, "b", 3, -101);
-  cout << add_order(C, 2, "b", 3, 101);
   //add order no account
   cout << add_order(C, -1, "d", 3, -3);
   //add order no stock
@@ -59,13 +55,21 @@ int main (int argc, char *argv[])
   //check buy exact num
   cout << add_stock(C, 1, "e", 19);
   cout << add_order(C, 1, "e", 4, -100);
-  cout << add_order(C, 4, "b", 4, 100);
   cout << add_order(C, 3, "e", 4, 101);
   //check buy all, sell left
   cout << add_stock(C, 1, "f", 19);
   cout << add_order(C, 1, "f", 4, -100);
   cout << add_order(C, 3, "f", 3, 101);
-
+  //check sell all, buy left
+  cout << add_stock(C, 1, "g", 19);
+  cout << add_stock(C, 2, "g", 19);
+  cout << add_order(C, 1, "g", 1, -100);
+  cout << add_order(C, 2, "g", 2, -99);
+  cout << add_order(C, 3, "g", 4, 101);
+  // too expensive to buy
+  cout << add_stock(C, 1, "h", 19);
+  cout << add_order(C, 1, "h", 3, -102);
+  cout << add_order(C, 3, "h", 4, 101);
 
   C->disconnect();
   return 0;
