@@ -49,14 +49,14 @@ string add_account(connection *C, int account_id, float balance){
   string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
   result R=selectSQL(C,sql1);
   if(R.size()!=0){
-    return "<error id=\""+to_string(account_id)+"\">Account already exists</error>\n";
+    return "  <error id=\""+to_string(account_id)+"\">Account already exists</error>\n";
   }
 
   string sql2 = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" 
                 + to_string(account_id) + "," 
                 + to_string(balance) + ");";
   runSQL(sql2,C);
-  return "<created id=\""+to_string(account_id)+"\"/>\n";
+  return "  <created id=\""+to_string(account_id)+"\"/>\n";
 }
 
 string add_stock(connection *C, int account_id, string symbol, int amount){
@@ -64,7 +64,7 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
   string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ N.quote(account_id);
   result R( N.exec( sql1 ));
   if(R.size()==0){
-    return "<error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
+    return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
   }
   N.exec(sql1);
   N.commit();
@@ -74,7 +74,7 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
                 + quoteStr(C,symbol) + "," 
                 + to_string(amount) + ");";
   runSQL(sql,C);
-  return "<created sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\"/>\n";
+  return "  <created sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
 
 void insert_order(connection *C, int order_id, int account_id, string symbol, int amount, float price, string type, string states){
@@ -137,7 +137,7 @@ string add_buy_order(connection *C, int account_id, string symbol, int amount, f
     }
     ++c;
   }
-  return "<opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(old_amount)+"\" limit=\""+float_to_string(price)+"\" id=\""+to_string(account_id)+"\"/>\n";
+  return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(old_amount)+"\" limit=\""+float_to_string(price)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
 
 string add_sell_order(connection *C, int account_id, string symbol, int amount, float price, string states){
@@ -174,14 +174,14 @@ string add_sell_order(connection *C, int account_id, string symbol, int amount, 
     }
     ++c;
   }
-  return "<opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(old_amount)+"\" limit=\""+float_to_string(-price)+"\" id=\""+to_string(account_id)+"\"/>\n";
+  return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(old_amount)+"\" limit=\""+float_to_string(-price)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
 
 string add_order(connection *C, int account_id, string symbol, int amount, float price){
   string sql1 = "SELECT ACCOUNT_ID, BALANCE FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
   result R=selectSQL(C, sql1);
   if(R.size()==0){
-    return "<error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(price)+"\">Account does not exist</error>\n";
+    return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(price)+"\">Account does not exist</error>\n";
   }
   
   string type= "buy";
@@ -191,7 +191,7 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
   }
   if(type=="buy"){
     if(price*amount>=R.begin()[1].as<int>()){
-      return "<error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(price)+"\">Not enough money</error>\n";
+      return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(price)+"\">Not enough money</error>\n";
     }
     else{
       string sql2="UPDATE ACCOUNT \
@@ -207,7 +207,7 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
                     WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + quoteStr(C,symbol);
     result R2=selectSQL(C,sql3);
     if(R2.size()<1 || amount > R2.begin()[1].as<int>()){
-      return "<error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(-price)+"\">Not enough stocks</error>\n";
+      return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(-price)+"\">Not enough stocks</error>\n";
     }
     else{
       string sql4="UPDATE STOCK \
