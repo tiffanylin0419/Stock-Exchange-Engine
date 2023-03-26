@@ -104,7 +104,6 @@ void insert_order(connection *C, int order_id, int account_id, string symbol, in
 }
 
 string add_buy_order(connection *C, int account_id, string symbol, int amount, float price, string states){
-  //todo
   int old_amount=amount;
   string sql1 = "SELECT * \
                 FROM ORDERS \
@@ -138,14 +137,43 @@ string add_buy_order(connection *C, int account_id, string symbol, int amount, f
     }
     ++c;
   }
-
   return "<opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(old_amount)+"\" limit=\""+float_to_string(price)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
 
 string add_sell_order(connection *C, int account_id, string symbol, int amount, float price, string states){
-  //todo
   int old_amount=amount;
-  insert_order(C, 0, account_id, symbol, amount, price, "sell", states);
+  string sql1 = "SELECT * \
+                FROM ORDERS \
+                WHERE TYPES= 'buy' AND SYMBOL= " + quoteStr(C, symbol) +" AND PRICE > " + to_string(price) + " AND STATES = 'open'\
+                ORDER BY PRICE DESC, TIME ASC";
+  result R=selectSQL(C, sql1);
+
+  result::const_iterator c = R.begin();
+  while(true){
+    if(amount == 0){ //done
+      break;
+    }
+    if(c == R.end()){// no more to buy
+      insert_order(C, 0, account_id, symbol, amount, price, "sell", states);
+      break;
+    }
+    else if(amount < c[3].as<int>()){ // sell all, buy left
+      string sql2="UPDATE ORDERS \
+                  SET AMOUNT=AMOUNT-" + to_string(amount) +
+                  "WHERE ORDER_ID = " + to_string(c[0]) + " AND TIME = " + quoteStr(C,c[7].as<string>());
+      runSQL(sql2, C);
+      insert_order(C, c[0].as<int>(), account_id, symbol, amount, c[4].as<int>(), "buy", "execute");
+      break;
+    }
+    else{ // buy all
+      string sql2="UPDATE ORDERS \
+                  SET TIME= NOW(), STATES = 'execute'\
+                  WHERE ORDER_ID = " + to_string(c[0]) + " AND TIME = " + quoteStr(C,c[7].as<string>());
+      runSQL(sql2, C);
+      amount-=c[3].as<int>();
+    }
+    ++c;
+  }
   return "<opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(old_amount)+"\" limit=\""+float_to_string(-price)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
 
