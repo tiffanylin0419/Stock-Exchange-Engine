@@ -11,6 +11,18 @@ void runSQL(string sql, connection *C){
   W.commit();
 }
 
+result selectSQL(connection *C, string sql){
+  nontransaction N(*C);
+  result R( N.exec( sql ));
+  N.commit();
+  return R;
+}
+
+string quoteStr(connection *C, string s){
+  nontransaction N(*C);
+  return N.quote(s);
+}
+
 void deleteTable(connection *C, string tableName){
   string sql = "DROP TABLE IF EXISTS " + tableName + " CASCADE;";
   runSQL(sql,C);
@@ -34,23 +46,17 @@ void createTable(string fileName, connection *C){
 }
 
 string add_account(connection *C, int account_id, float balance){
-  nontransaction N(*C);
-  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ N.quote(account_id);
-  result R( N.exec( sql1 ));
+  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
+  result R=selectSQL(C,sql1);
   if(R.size()!=0){
     return "<error id=\""+to_string(account_id)+"\">Account already exists</error>\n";
   }
-  N.commit();
+
   string sql2 = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" 
                 + to_string(account_id) + "," 
                 + to_string(balance) + ");";
   runSQL(sql2,C);
   return "<created id=\""+to_string(account_id)+"\"/>\n";
-}
-
-string quoteStr(connection *C, string s){
-  nontransaction N(*C);
-  return N.quote(s);
 }
 
 string add_stock(connection *C, int account_id, string symbol, int amount){
@@ -91,12 +97,13 @@ string add_sell_order(connection *C, int account_id, string symbol, int amount, 
 }
 
 string add_order(connection *C, int account_id, string symbol, int amount, float price, string states){
-  work W(*C);
-  string sql1 = "SELECT ACCOUNT_ID, BALANCE FROM ACCOUNT WHERE ACCOUNT_ID= "+ W.quote(account_id);
-  result R( W.exec( sql1 ));
+  
+  string sql1 = "SELECT ACCOUNT_ID, BALANCE FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
+  result R=selectSQL(C, sql1);
   if(R.size()==0){
     return "<error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(price)+"\">Account does not exist</error>\n";
   }
+  
   string type= "buy";
   if(price<0){
     type="sell";
@@ -109,26 +116,24 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
     else{
       string sql2="UPDATE ACCOUNT \
                     SET BALANCE = BALANCE-"+to_string(price*amount)+" \
-                    WHERE ACCOUNT_ID= "+ W.quote(account_id);
-      W.exec(sql2);
-      W.commit();
+                    WHERE ACCOUNT_ID= "+ to_string(account_id);
+      runSQL(sql2,C);
       return add_buy_order(C, account_id, symbol, amount, price, states);
     }
   }
   else{//sell
     string sql3 = "SELECT STOCK_ID, AMOUNT \
                     FROM STOCK \
-                    WHERE ACCOUNT_ID= "+ W.quote(account_id) + " AND SYMBOL = " + W.quote(symbol);
-    result R2( W.exec( sql3 ));
+                    WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + quoteStr(C,symbol);
+    result R2=selectSQL(C,sql3);
     if(R2.size()<1 || amount > R2.begin()[1].as<int>()){
       return "<error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(-price)+"\">Not enough stocks</error>\n";
     }
     else{
       string sql4="UPDATE STOCK \
-                  SET AMOUNT = AMOUNT-"+to_string(amount)+" \
-                  WHERE ACCOUNT_ID= "+ W.quote(account_id);
-      W.exec(sql4);
-      W.commit();
+                  SET AMOUNT = AMOUNT-"+ to_string(amount)+" \
+                  WHERE ACCOUNT_ID= "+ to_string(account_id);
+      runSQL(sql4,C);            
       return add_sell_order(C, account_id, symbol, amount, price, states);
     }
   }  

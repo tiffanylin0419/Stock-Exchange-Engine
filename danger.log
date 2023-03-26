@@ -1,1 +1,9 @@
+todo:
+condition check, ex. >0
+
+
+check:
 want server to run forever: cannot return -1 in main
+
+
+problem: transaction_ID?
