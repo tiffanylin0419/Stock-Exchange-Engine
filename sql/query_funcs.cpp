@@ -219,6 +219,53 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
   }  
 }
 
+string query_open(connection *C, int order_id){
+  string ans="";
+  string sql1 = "SELECT AMOUNT \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'open'";
+  result R=selectSQL(C, sql1);
+
+  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+    ans+="    <open shares="+c[0].as<string>()+"/>\n";
+  }
+  return ans;
+}
+
+string query_cancel(connection *C, int order_id){
+  string ans="";
+  string sql1 = "SELECT AMOUNT, TIME \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'cancel'";
+  result R=selectSQL(C, sql1);
+
+  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+    ans+="    <canceled shares="+c[0].as<string>()+" time="+c[1].as<string>()+"/>\n";
+  }
+  return ans;
+}
+
+string query_execute(connection *C, int order_id){
+  string ans="";
+  string sql1 = "SELECT AMOUNT, TIME, PRICE \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'";
+  result R=selectSQL(C, sql1);
+
+  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+    ans+="    <executed shares="+c[0].as<string>()+" price="+c[2].as<string>()+" time="+c[1].as<string>()+"/>\n";
+  }
+  return ans;
+}
+
+string query(connection *C, int order_id){
+  string ans="  <status id=\""+to_string(order_id)+"\">\n";
+  ans+=query_open(C,order_id);
+  ans+=query_cancel(C,order_id);
+  ans+=query_execute(C,order_id);
+  ans +="  </status>\n";
+  return ans;
+}
 /*
 void insertAccount(string fileName, connection *C){
   string line;
