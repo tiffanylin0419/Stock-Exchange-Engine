@@ -14,7 +14,7 @@ void createTable(string fileName, connection *C);
 
 string add_account(connection *C, int account_id, float balance);
 string add_stock(connection *C, int account_id, string symbol, int amount);
-string add_order(connection *C, int account_id, string symbol, int amount, float price, string states);
+string add_order(connection *C, int account_id, string symbol, int amount, float price);
 
 /*
 void insertAccount(string fileName, connection *C);

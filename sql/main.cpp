@@ -31,20 +31,40 @@ int main (int argc, char *argv[])
   /*insertAccount("account.txt", C);
   insertStock("stock.txt", C);
   insertOrder("order.txt", C);*/
-  cout << add_account(C, 11, 40);
-  //cout << add_account(C, 11, 32);
-  cout << add_account(C, 12, 304);
-  cout << add_stock(C, 11, "ab", 3);
-  cout << add_stock(C, 11, "BTS", 7);
-  cout << add_stock(C, 12, "BIT", 9);
-  cout << add_stock(C, 13, "BIT", 9);
-  cout << add_order(C, 11, "stock1", 3, 3, "open");
-  cout << add_order(C, 11, "stock1", 3, -3, "open");
-  cout << add_order(C, 11, "BTS", 3, -101, "open");
-  cout << add_order(C, 12, "BTS", 1, 101, "open");
-  cout << add_order(C, 12, "BTS", 8, 101, "open");
-  cout << add_order(C, 11, "BTS", 4, -100, "open");
-  cout << add_order(C, 14, "BTS", 4, -100, "open");
+
+  // add account
+  cout << add_account(C, 1, 40);
+  cout << add_account(C, 2, 304);
+  cout << add_account(C, 3, 30400);
+  cout << add_account(C, 4, 30400);
+  // add account fail
+  cout << add_account(C, 1, 32);
+  //add stock
+  cout << add_stock(C, 1, "a", 3);
+  cout << add_stock(C, 1, "b", 7);
+  cout << add_stock(C, 2, "c", 9);
+  cout << add_stock(C, 3, "c", 9);
+  //add stock fail
+  cout << add_stock(C, -1, "a", 3);
+  //add order
+  cout << add_order(C, 1, "d", 3, 3);
+  cout << add_order(C, 1, "b", 3, -101);
+  cout << add_order(C, 2, "b", 3, 101);
+  //add order no account
+  cout << add_order(C, -1, "d", 3, -3);
+  //add order no stock
+  cout << add_order(C, 1, "d", 3, -3);
+  //add order no money
+  cout << add_order(C, 2, "b", 8, 101);
+  //check buy exact num
+  cout << add_stock(C, 1, "e", 19);
+  cout << add_order(C, 1, "e", 4, -100);
+  cout << add_order(C, 4, "b", 4, 100);
+  cout << add_order(C, 3, "e", 4, 101);
+  //check buy all, sell left
+  cout << add_stock(C, 1, "f", 19);
+  cout << add_order(C, 1, "f", 4, -100);
+  cout << add_order(C, 3, "f", 3, 101);
 
 
   C->disconnect();
