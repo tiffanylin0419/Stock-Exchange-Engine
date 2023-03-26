@@ -31,16 +31,20 @@ int main (int argc, char *argv[])
   /*insertAccount("account.txt", C);
   insertStock("stock.txt", C);
   insertOrder("order.txt", C);*/
-  cout << add_account(C, 11, 30);
-  cout << add_account(C, 11, 32);
-  cout << add_account(C, 12, 34);
+  cout << add_account(C, 11, 40);
+  //cout << add_account(C, 11, 32);
+  cout << add_account(C, 12, 304);
   cout << add_stock(C, 11, "ab", 3);
   cout << add_stock(C, 11, "BTS", 7);
   cout << add_stock(C, 12, "BIT", 9);
   cout << add_stock(C, 13, "BIT", 9);
   cout << add_order(C, 11, "stock1", 3, 3, "open");
-  cout << add_order(C, 12, "BTS", 3, 101, "open");
+  cout << add_order(C, 11, "stock1", 3, -3, "open");
+  cout << add_order(C, 11, "BTS", 3, -101, "open");
+  cout << add_order(C, 12, "BTS", 1, 101, "open");
+  cout << add_order(C, 12, "BTS", 8, 101, "open");
   cout << add_order(C, 11, "BTS", 4, -100, "open");
+  cout << add_order(C, 14, "BTS", 4, -100, "open");
 
 
   C->disconnect();
