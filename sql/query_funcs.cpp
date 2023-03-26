@@ -2,12 +2,35 @@
 
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 
 void runSQL(string sql, connection *C){
   work W(*C);
   W.exec(sql);
   W.commit();
+}
+
+void deleteTable(connection *C, string tableName){
+  string sql = "DROP TABLE IF EXISTS " + tableName + " CASCADE;";
+  runSQL(sql,C);
+}
+
+void createTable(string fileName, connection *C){
+  string sql="";
+  string line;
+  ifstream f (fileName.c_str());
+  if (f.is_open()){
+      while(getline(f,line)){
+      	sql.append(line);
+      }
+      f.close();
+  }
+  else{
+    cout << "Cannot open " + fileName <<endl;
+    exit(1);
+  }
+  runSQL(sql,C);
 }
 
 void add_account(connection *C, int account_id, float balance){
@@ -47,49 +70,66 @@ void add_order(connection *C, int account_id, string symbol, int amount, float p
   W.exec(sql);
   W.commit();
 }
+
 /*
-void add_player(connection *C, int team_id, int jersey_num, string first_name, string last_name,
-                int mpg, int ppg, int rpg, int apg, double spg, double bpg)
-{
-  work W(*C);
-  string sql = "INSERT INTO PLAYER (TEAM_ID, UNIFORM_NUM, FIRST_NAME, LAST_NAME, MPG, PPG, RPG, APG, SPG, BPG) VALUES (" 
-              + std::to_string(team_id) + ","
-              + std::to_string(jersey_num) + ","
-              + W.quote(first_name) + ","
-              + W.quote(last_name) + ","
-              + std::to_string(mpg) + ","
-              + std::to_string(ppg) + ","
-              + std::to_string(rpg) + ","
-              + std::to_string(apg) + ","
-              + std::to_string(spg) + ","
-              + std::to_string(bpg) +");";
-  W.exec(sql);
-  W.commit();
+void insertAccount(string fileName, connection *C){
+  string line;
+  int account_id;
+  float balance;
+  ifstream f (fileName.c_str());
+  if (f.is_open()){
+      while(getline(f,line)){
+        stringstream ss;
+        ss << line;
+        ss >> account_id >> balance;
+        add_account(C, account_id , balance);
+      }
+      f.close();
+  }
+  else{
+    cout << "Cannot open " + fileName <<endl;
+    exit(1);
+  }
 }
 
-
-void add_team(connection *C, string name, int state_id, int color_id, int wins, int losses)
-{
-  work W(*C);
-  string sql = "INSERT INTO TEAM (NAME, STATE_ID, COLOR_ID, WINS, LOSSES) VALUES (" 
-              + W.quote(name) + ","
-              + std::to_string(state_id) + ","
-              + std::to_string(color_id) + ","
-              + std::to_string(wins) + ","
-              + std::to_string(losses) +");";
-  W.exec(sql);
-  W.commit();
+void insertStock(string fileName, connection *C){
+  string line, symbol;
+  int account_id, amount;
+  ifstream f (fileName.c_str());
+  if (f.is_open()){
+      while(getline(f,line)){
+        stringstream ss;
+        ss << line;
+        ss >> account_id >> symbol >> amount;
+        add_stock(C, account_id, symbol, amount);
+      }
+      f.close();
+  }
+  else{
+    cout << "Cannot open " + fileName <<endl;
+    exit(1);
+  }
 }
 
-
-void add_state(connection *C, string name)
-{
-  work W(*C);
-  string sql = "INSERT INTO STATE (NAME) VALUES (" + W.quote(name) + ");";
-  W.exec(sql);
-  W.commit();
+void insertOrder(string fileName, connection *C){
+  string line, symbol, states;
+  int account_id, amount;
+  float price;
+  ifstream f (fileName.c_str());
+  if (f.is_open()){
+      while(getline(f,line)){
+        stringstream ss;
+        ss << line;
+        ss >> account_id >> symbol >> amount >> price >> states;
+        add_order(C, account_id, symbol, amount, price, states);
+      }
+      f.close();
+  }
+  else{
+    cout << "Cannot open " + fileName <<endl;
+    exit(1);
+  }
 }
-
 */
 
 /*

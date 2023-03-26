@@ -9,30 +9,20 @@ using namespace pqxx;
 #define _QUERY_FUNCS_
 
 
-void runSQL(string sql, connection *C);
+void deleteTable(connection *C, string tableName);
+void createTable(string fileName, connection *C);
+
 void add_account(connection *C, int account_id, float balance);
 void add_stock(connection *C, int account_id, string symbol, int amount);
-void add_order(connection *C, int account_id, string symbol, int amount, float price, string state);
+void add_order(connection *C, int account_id, string symbol, int amount, float price, string states);
+
 /*
- * All use_ params are used as flags for corresponding attributes
- * a 1 for a use_ param means this attribute is enabled (i.e. a WHERE clause is needed)
- * a 0 for a use_ param means this attribute is disabled
- */
-void query1(connection *C, 
-            int use_mpg, int min_mpg, int max_mpg,
-	    int use_ppg, int min_ppg, int max_ppg,
-	    int use_rpg, int min_rpg, int max_rpg,
-	    int use_apg, int min_apg, int max_apg,
-	    int use_spg, double min_spg, double max_spg,
-	    int use_bpg, double min_bpg, double max_bpg
-	    );
+void insertAccount(string fileName, connection *C);
+void insertStock(string fileName, connection *C);
+void insertOrder(string fileName, connection *C);
+*/
 
-void query2(connection *C, string team_color);
 
-void query3(connection *C, string team_name);
 
-void query4(connection *C, string team_state, string team_color);
-
-void query5(connection *C, int num_wins);
 
 #endif //_QUERY_FUNCS_

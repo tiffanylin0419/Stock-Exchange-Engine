@@ -1,92 +1,10 @@
 #include <iostream>
 #include <pqxx/pqxx>
-#include <fstream>
 
 #include "query_funcs.h"
 
 using namespace std;
 using namespace pqxx;
-
-void deleteTable(connection *C, string tableName){
-  string sql = "DROP TABLE IF EXISTS " + tableName + " CASCADE;";
-  runSQL(sql,C);
-}
-
-void createTable(string fileName, connection *C){
-  string sql="";
-  string line;
-  ifstream f (fileName.c_str());
-  if (f.is_open()){
-      while(getline(f,line)){
-      	sql.append(line);
-      }
-      f.close();
-  }
-  else{
-    cout << "Cannot open " + fileName <<endl;
-    exit(1);
-  }
-  runSQL(sql,C);
-}
-
-void insertAccount(string fileName, connection *C){
-  string line;
-  int account_id;
-  float balance;
-  ifstream f (fileName.c_str());
-  if (f.is_open()){
-      while(getline(f,line)){
-        stringstream ss;
-        ss << line;
-        ss >> account_id >> balance;
-        add_account(C, account_id , balance);
-      }
-      f.close();
-  }
-  else{
-    cout << "Cannot open " + fileName <<endl;
-    exit(1);
-  }
-}
-
-void insertStock(string fileName, connection *C){
-  string line, symbol;
-  int account_id, amount;
-  ifstream f (fileName.c_str());
-  if (f.is_open()){
-      while(getline(f,line)){
-        stringstream ss;
-        ss << line;
-        ss >> account_id >> symbol >> amount;
-        add_stock(C, account_id, symbol, amount);
-      }
-      f.close();
-  }
-  else{
-    cout << "Cannot open " + fileName <<endl;
-    exit(1);
-  }
-}
-
-void insertOrder(string fileName, connection *C){
-  string line, symbol, states;
-  int account_id, amount;
-  float price;
-  ifstream f (fileName.c_str());
-  if (f.is_open()){
-      while(getline(f,line)){
-        stringstream ss;
-        ss << line;
-        ss >> account_id >> symbol >> amount >> price >> states;
-        add_order(C, account_id, symbol, amount, price, states);
-      }
-      f.close();
-  }
-  else{
-    cout << "Cannot open " + fileName <<endl;
-    exit(1);
-  }
-}
 
 int main (int argc, char *argv[]) 
 {
@@ -110,9 +28,19 @@ int main (int argc, char *argv[])
   createTable("account.sql", C);
   createTable("stock.sql", C);
   createTable("order.sql", C);
-  insertAccount("account.txt", C);
+  /*insertAccount("account.txt", C);
   insertStock("stock.txt", C);
-  insertOrder("order.txt", C);
+  insertOrder("order.txt", C);*/
+  add_account(C, 11, 30);
+  add_account(C, 12, 34);
+  add_stock(C, 11, "ab", 3);
+  add_stock(C, 11, "BTS", 7);
+  add_stock(C, 12, "BIT", 9);
+  add_order(C, 11, "stock1", 3, 3, "open");
+  add_order(C, 12, "BTS", 3, 101, "open");
+  add_order(C, 11, "BTS", 4, -100, "open");
+
+
   C->disconnect();
   return 0;
 }
