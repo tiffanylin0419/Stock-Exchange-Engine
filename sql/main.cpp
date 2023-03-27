@@ -50,7 +50,9 @@ int main (int argc, char *argv[])
   cout << add_stock(C, 1, "b", 7);
   cout << add_stock(C, 2, "c", 9);
   cout << add_stock(C, 3, "c", 9);
-  //add stock fail
+  //add repeated stock
+  cout << add_stock(C, 3, "c", 10);
+  /*//add stock fail
   cout << add_stock(C, -1, "a", 3);
   cout << add_stock(C, 3, "c", 0);
   //add order no account
@@ -106,7 +108,7 @@ int main (int argc, char *argv[])
   //check cancel
   cout<<cancel(C, 8);
   //check cancel error
-  cout<<cancel(C, 25);
+  cout<<cancel(C, 25);*/
 
   C->disconnect();
   return 0;

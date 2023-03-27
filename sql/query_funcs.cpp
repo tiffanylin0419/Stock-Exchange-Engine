@@ -63,23 +63,31 @@ string add_account(connection *C, int account_id, float balance){
 }
 
 string add_stock(connection *C, int account_id, string symbol, int amount){
-  nontransaction N(*C);
-  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ N.quote(account_id);
-  result R( N.exec( sql1 ));
-  if(R.size()==0){
-    return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
-  }
   if(amount<=0){
     return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Amount cannot be smaller or equal to 0</error>\n";
   }
-  N.exec(sql1);
-  N.commit();
-
-  string sql = "INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
-                + to_string(account_id) + "," 
-                + quoteStr(C,symbol) + "," 
-                + to_string(amount) + ");";
-  runSQL(sql,C);
+  //check account exist
+  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ quoteStr(C, to_string(account_id));
+  result R=selectSQL(C, sql1 );
+  if(R.size()==0){
+    return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
+  }
+  
+  string sql2 = "SELECT STOCK_ID FROM STOCK WHERE ACCOUNT_ID= " + quoteStr(C, to_string(account_id)) + " AND SYMBOL = " + quoteStr(C, symbol);
+  result R2 = selectSQL(C, sql2);
+  if(R2.size()==0){//stock does not exist->insert
+    string sql = "INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
+                  + to_string(account_id) + "," 
+                  + quoteStr(C,symbol) + "," 
+                  + to_string(amount) + ");";
+    runSQL(sql,C);
+  }
+  else{//stock exist->update
+    string sql = "UPDATE STOCK \
+                  SET AMOUNT=AMOUNT+" + to_string(amount) +
+                  "WHERE STOCK_ID = " + R2[0][0].as<string>();
+    runSQL(sql,C);
+  }
   return "  <created sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
 
