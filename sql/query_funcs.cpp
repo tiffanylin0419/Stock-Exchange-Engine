@@ -103,6 +103,36 @@ void insert_order(connection *C, int order_id, int account_id, string symbol, in
   }
 }
 
+void buyAll(connection *C, result::const_iterator buy, result::const_iterator sell, int price){
+  //sell update amount
+  string sql3="UPDATE ORDERS \
+              SET AMOUNT=AMOUNT-" + buy[3].as<string>() +
+              "WHERE ORDER_ID = " + sell[0].as<string>() + " AND TIME = " + quoteStr(C,sell[7].as<string>());
+  runSQL(sql3, C);
+  // sell insert executed (price depends)
+  insert_order(C, sell[0].as<int>(), sell[1].as<int>(), sell[2].as<string>(), sell[3].as<int>(), price, "sell", "execute");
+  // buy update execute (price depends)
+  string sql4="UPDATE ORDERS \
+              SET TIME= NOW(), STATES = 'execute', PRICE = "+ to_string(price) +
+              "WHERE ORDER_ID = " + buy[0].as<string>() + " AND TIME = " + quoteStr(C,buy[7].as<string>());
+  runSQL(sql4, C);
+}
+
+void sellAll(connection *C, result::const_iterator buy, result::const_iterator sell, int price){
+  //buy update amount
+  string sql3="UPDATE ORDERS \
+              SET AMOUNT=AMOUNT-" + sell[3].as<string>() +
+              "WHERE ORDER_ID = " + buy[0].as<string>() + " AND TIME = " + quoteStr(C,buy[7].as<string>());
+  runSQL(sql3, C);
+  //buy insert execute (price depends)
+  insert_order(C, buy[0].as<int>(), buy[1].as<int>(), buy[2].as<string>(), buy[3].as<int>(), price, "buy", "execute");
+  //sell update execute (price depends)
+  string sql4="UPDATE ORDERS \
+              SET TIME= NOW(), STATES = 'execute', PRICE = "+ to_string(price) +
+              "WHERE ORDER_ID = " + sell[0].as<string>() + " AND TIME = " + quoteStr(C,sell[7].as<string>());
+  runSQL(sql4, C);
+}
+
 int add_buy_order(connection *C, int account_id, string symbol, int amount, float price, string states){
   insert_order(C, 0, account_id, symbol, amount, price, "buy", states);
   //get sell orders
@@ -129,28 +159,12 @@ int add_buy_order(connection *C, int account_id, string symbol, int amount, floa
     if(c == R_sell.end()){ // no more to sell
       break;
     }
-    if(amount < c[3].as<int>()){ // buy all, sell left
-      string sql3="UPDATE ORDERS \
-                  SET AMOUNT=AMOUNT-" + to_string(amount) +
-                  "WHERE ORDER_ID = " + to_string(c[0]) + " AND TIME = " + quoteStr(C,c[7].as<string>());
-      runSQL(sql3, C);
-      insert_order(C, c[0].as<int>(), account_id, symbol, amount, c[4].as<int>(), "sell", "execute");
-      string sql4="UPDATE ORDERS \
-                  SET TIME= NOW(), STATES = 'execute', PRICE = "+c[4].as<string>()+
-                  "WHERE ORDER_ID = " + to_string(R_buy.begin()[0]) + " AND TIME = " + quoteStr(C,R_buy.begin()[7].as<string>());
-      runSQL(sql4, C);
+    if(amount < c[3].as<int>()){
+      buyAll(C, R_buy.begin(),c, c[4].as<int>());
       break;
     }
-    else{ // sell all
-      string sql3="UPDATE ORDERS \
-                  SET TIME= NOW(), STATES = 'execute'\
-                  WHERE ORDER_ID = " + to_string(c[0]) + " AND TIME = " + quoteStr(C,c[7].as<string>());
-      runSQL(sql3, C);
-      string sql4="UPDATE ORDERS \
-                  SET AMOUNT=AMOUNT-" +  to_string(c[3]) +
-                  "WHERE ORDER_ID = " + to_string(R_buy.begin()[0]) + " AND TIME = " + quoteStr(C,R_buy.begin()[7].as<string>());
-      runSQL(sql4, C);
-      insert_order(C, R_buy.begin()[0].as<int>(), R_buy.begin()[1].as<int>(), symbol, c[3].as<int>(), c[4].as<int>(), "buy", "execute");
+    else{
+      sellAll(C, R_buy.begin(),c, c[4].as<int>());
       amount-=c[3].as<int>();
     }
     ++c;
@@ -158,7 +172,7 @@ int add_buy_order(connection *C, int account_id, string symbol, int amount, floa
   return num[0][0].as<int>();
 }
 
-void add_sell_order(connection *C, int account_id, string symbol, int amount, float price, string states){
+int add_sell_order(connection *C, int account_id, string symbol, int amount, float price, string states){
   insert_order(C, 0, account_id, symbol, amount, price, "sell", states);
   //get buy orders
   string sql1 = "SELECT * \
@@ -181,23 +195,17 @@ void add_sell_order(connection *C, int account_id, string symbol, int amount, fl
     if(c == R_buy.end()){// no more to buy
       break;
     }
-    else if(amount < c[3].as<int>()){ // sell all, buy left
-      string sql3="UPDATE ORDERS \
-                  SET AMOUNT=AMOUNT-" + to_string(amount) +
-                  "WHERE ORDER_ID = " + to_string(c[0]) + " AND TIME = " + quoteStr(C,c[7].as<string>());
-      runSQL(sql3, C);
-      insert_order(C, c[0].as<int>(), account_id, symbol, amount, c[4].as<int>(), "buy", "execute");
+    if(amount < c[3].as<int>()){ // sell all, buy left
+      sellAll(C, c, R_sell.begin(), c[4].as<int>());
       break;
     }
     else{ // buy all
-      string sql3="UPDATE ORDERS \
-                  SET TIME= NOW(), STATES = 'execute'\
-                  WHERE ORDER_ID = " + to_string(c[0]) + " AND TIME = " + quoteStr(C,c[7].as<string>());
-      runSQL(sql3, C);
+      buyAll(C, c, R_sell.begin(), c[4].as<int>());
       amount-=c[3].as<int>();
     }
     ++c;
   }
+  return num[0][0].as<int>();
 }
 
 string add_order(connection *C, int account_id, string symbol, int amount, float price){
@@ -238,8 +246,8 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
                   SET AMOUNT = AMOUNT-"+ to_string(amount)+" \
                   WHERE ACCOUNT_ID= "+ to_string(account_id);
       runSQL(sql4,C);            
-      add_sell_order(C, account_id, symbol, amount, price, "open");
-      return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(-price)+"\" id=\""+to_string(account_id)+"\"/>\n";
+      int n = add_sell_order(C, account_id, symbol, amount, price, "open");
+      return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(-price)+"\" id=\""+to_string(n)+"\"/>\n";
     }
   }  
 }
