@@ -104,7 +104,7 @@ void insert_order(connection *C, int order_id, int account_id, string symbol, in
   }
 }
 
-void buyAll(connection *C, result::const_iterator buy, result::const_iterator sell, int price){
+void buyAll(connection *C, result::const_iterator buy, result::const_iterator sell, float price){
   //sell update amount
   string sql3="UPDATE ORDERS \
               SET AMOUNT=AMOUNT-" + buy[3].as<string>() +
@@ -119,7 +119,7 @@ void buyAll(connection *C, result::const_iterator buy, result::const_iterator se
   runSQL(sql4, C);
 }
 
-void sellAll(connection *C, result::const_iterator buy, result::const_iterator sell, int price){
+void sellAll(connection *C, result::const_iterator buy, result::const_iterator sell, float price){
   //buy update amount
   string sql3="UPDATE ORDERS \
               SET AMOUNT=AMOUNT-" + sell[3].as<string>() +
@@ -161,11 +161,11 @@ int add_buy_order(connection *C, int account_id, string symbol, int amount, floa
       break;
     }
     if(amount < c[3].as<int>()){
-      buyAll(C, R_buy.begin(),c, c[4].as<int>());
+      buyAll(C, R_buy.begin(),c, c[4].as<float>());
       break;
     }
     else{
-      sellAll(C, R_buy.begin(),c, c[4].as<int>());
+      sellAll(C, R_buy.begin(),c, c[4].as<float>());
       amount-=c[3].as<int>();
     }
     ++c;
@@ -200,11 +200,11 @@ int add_sell_order(connection *C, int account_id, string symbol, int amount, flo
       break;
     }
     if(amount < c[3].as<int>()){ // sell all, buy left
-      sellAll(C, c, R_sell.begin(), c[4].as<int>());
+      sellAll(C, c, R_sell.begin(), c[4].as<float>());
       break;
     }
     else{ // buy all
-      buyAll(C, c, R_sell.begin(), c[4].as<int>());
+      buyAll(C, c, R_sell.begin(), c[4].as<float>());
       amount-=c[3].as<int>();
     }
     ++c;
@@ -216,7 +216,7 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
   string sql1 = "SELECT ACCOUNT_ID, BALANCE FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
   result R=selectSQL(C, sql1);
   if(R.size()==0){
-    return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(price)+"\">Account does not exist</error>\n";
+    return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Account does not exist</error>\n";
   }
   
   string type= "buy";
@@ -226,7 +226,7 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
   }
   if(type=="buy"){
     if(price*amount>=R.begin()[1].as<int>()){
-      return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(price)+"\">Not enough money</error>\n";
+      return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Not enough money</error>\n";
     }
     else{
       string sql2="UPDATE ACCOUNT \
@@ -234,7 +234,7 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
                     WHERE ACCOUNT_ID= "+ to_string(account_id);
       runSQL(sql2,C);
       int n = add_buy_order(C, account_id, symbol, amount, price, "open");
-      return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(price)+"\" id=\""+to_string(n)+"\"/>\n";  
+      return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";  
     }
   }
   else{//sell
@@ -243,7 +243,7 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
                     WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + quoteStr(C,symbol);
     result R2=selectSQL(C,sql3);
     if(R2.size()<1 || amount > R2.begin()[1].as<int>()){
-      return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(-price)+"\">Not enough stocks</error>\n";
+      return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Not enough stocks</error>\n";
     }
     else{
       string sql4="UPDATE STOCK \
@@ -251,7 +251,7 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
                   WHERE ACCOUNT_ID= "+ to_string(account_id);
       runSQL(sql4,C);            
       int n = add_sell_order(C, account_id, symbol, amount, price, "open");
-      return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+float_to_string(-price)+"\" id=\""+to_string(n)+"\"/>\n";
+      return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";
     }
   }  
 }
@@ -296,9 +296,9 @@ string query_execute(connection *C, int order_id){
 }
 
 string query_error(connection *C, int order_id){
-  string sql1 = "SELECT AMOUNT, TIMESEC, PRICE \
+  string sql1 = "SELECT * \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'";
+                WHERE ORDER_ID = " + to_string(order_id);
   result R=selectSQL(C, sql1);
 
   if(R.size()==0){
@@ -308,6 +308,19 @@ string query_error(connection *C, int order_id){
 }
 
 string query(connection *C, int order_id){
+  string ans=query_error(C,order_id);
+  if(ans!=""){
+    return ans;
+  }
+  ans="  <status id=\""+to_string(order_id)+"\">\n";
+  ans+=query_open(C,order_id);
+  ans+=query_cancel(C,order_id);
+  ans+=query_execute(C,order_id);
+  ans +="  </status>\n";
+  return ans;
+}
+
+string cancel(connection *C, int order_id){
   string ans=query_error(C,order_id);
   if(ans!=""){
     return ans;
