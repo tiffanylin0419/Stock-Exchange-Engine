@@ -79,7 +79,8 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
     return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
   }
   
-  string sql2 = "SELECT STOCK_ID FROM STOCK WHERE ACCOUNT_ID= " + quoteStr(C, to_string(account_id)) + " AND SYMBOL = " + quoteStr(C, symbol);
+  string sql2 = "SELECT STOCK_ID FROM STOCK \
+                WHERE ACCOUNT_ID= " + quoteStr(C, to_string(account_id)) + " AND SYMBOL = " + quoteStr(C, symbol);
   result R2 = selectSQL(C, sql2);
   if(R2.size()==0){//stock does not exist->insert
     string sql = "INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
@@ -96,6 +97,119 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
   }
   return "  <created sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+string query_open(connection *C, int order_id){
+  string ans="";
+  string sql1 = "SELECT AMOUNT \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'open'";
+  result R=selectSQL(C, sql1);
+
+  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+    ans+="    <open shares="+c[0].as<string>()+"/>\n";
+  }
+  return ans;
+}
+
+string query_cancel(connection *C, int order_id){
+  string ans="";
+  string sql1 = "SELECT AMOUNT, TIMESEC \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'cancel'";
+  result R=selectSQL(C, sql1);
+
+  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+    ans+="    <canceled shares="+c[0].as<string>()+" time="+c[1].as<string>()+"/>\n";
+  }
+  return ans;
+}
+
+string query_execute(connection *C, int order_id){
+  string ans="";
+  string sql1 = "SELECT AMOUNT, TIMESEC, PRICE \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'";
+  result R=selectSQL(C, sql1);
+
+  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+    ans+="    <executed shares="+c[0].as<string>()+" price="+c[2].as<string>()+" time="+c[1].as<string>()+"/>\n";
+  }
+  return ans;
+}
+
+string query_error(connection *C, int order_id){
+  string sql1 = "SELECT * \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id);
+  result R=selectSQL(C, sql1);
+
+  if(R.size()==0){
+    return "  <error id=\""+to_string(order_id)+"\">No such trans_id</error>\n";
+  }
+  return "";
+}
+
+string query_body(connection *C, int order_id){
+  return query_open(C,order_id)+query_cancel(C,order_id)+query_execute(C,order_id);
+}
+
+string query(connection *C, int order_id){
+  string ans=query_error(C,order_id);
+  if(ans!=""){
+    return ans;
+  }
+  return "  <status id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </status>\n";
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+void refundMoney(connection *C, int account_id, float refund){
+  string sql="UPDATE ACCOUNT \
+              SET BALANCE = BALANCE + " + to_string(refund) +
+              "WHERE ACCOUNT_ID = " + to_string(account_id);
+  runSQL(sql, C);
+}
+
+void refundStock(connection *C, int account_id, string symbol, int amount){
+  add_stock(C, account_id, symbol, amount);
+}
+
+string cancel(connection *C, int order_id){
+  string ans=query_error(C,order_id);
+  if(ans!=""){
+    return ans;
+  }
+  //already canceled
+  string sql1 = "SELECT * \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
+  result R=selectSQL(C, sql1);
+  if(R.size()<=0){
+    return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
+  }
+  //update order to cancel
+  string sql2="UPDATE ORDERS \
+              SET STATES=" + quoteStr(C, "cancel") +
+              "WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
+  runSQL(sql2, C);
+  //get refund value
+  string sql3 = "SELECT * \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "cancel");
+  result R2=selectSQL(C, sql3);
+  //refund
+  if(R[0][5].as<string>()=="buy"){
+    refundMoney(C, R2[0][1].as<int>(), R2[0][3].as<int>()*R2[0][4].as<float>());
+  }
+  else{
+    refundStock(C, R2[0][1].as<int>(), R2[0][2].as<string>(), R2[0][3].as<int>());
+  }
+
+  return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -139,6 +253,9 @@ void buyAll(connection *C, result::const_iterator buy, result::const_iterator se
               SET TIMESEC= "+to_string(getTime())+", STATES = 'execute', PRICE = "+ to_string(price) +
               "WHERE UNIQUE_ID = " + quoteStr(C,buy[8].as<string>());
   runSQL(sql4, C);
+  cout<<price*buy[3].as<int>()<<endl;
+  refundMoney(C, sell[1].as<int>(), price*buy[3].as<int>());
+  refundStock(C, buy[1].as<int>(), buy[2].as<string>(), buy[3].as<int>());
 }
 
 void sellAll(connection *C, result::const_iterator buy, result::const_iterator sell, float price){
@@ -154,6 +271,8 @@ void sellAll(connection *C, result::const_iterator buy, result::const_iterator s
               SET TIMESEC= "+to_string(getTime())+", STATES = 'execute', PRICE = "+ to_string(price) +
               "WHERE UNIQUE_ID = " + quoteStr(C,sell[8].as<string>());
   runSQL(sql4, C);
+  refundMoney(C, sell[1].as<int>(), price*buy[3].as<int>());
+  refundStock(C, buy[1].as<int>(), buy[2].as<string>(), buy[3].as<int>());
 }
 
 int add_buy_order(connection *C, int account_id, string symbol, int amount, float price, string states){
@@ -273,124 +392,12 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
     else{
       string sql4="UPDATE STOCK \
                   SET AMOUNT = AMOUNT-"+ to_string(amount)+" \
-                  WHERE ACCOUNT_ID= "+ to_string(account_id);
+                  WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + quoteStr(C,symbol);
       runSQL(sql4,C);            
       int n = add_sell_order(C, account_id, symbol, amount, price, "open");
       return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";
     }
   }  
-}
-
-///////////////////////////////////////////////////////////////////////////////////////
-
-string query_open(connection *C, int order_id){
-  string ans="";
-  string sql1 = "SELECT AMOUNT \
-                FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'open'";
-  result R=selectSQL(C, sql1);
-
-  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
-    ans+="    <open shares="+c[0].as<string>()+"/>\n";
-  }
-  return ans;
-}
-
-string query_cancel(connection *C, int order_id){
-  string ans="";
-  string sql1 = "SELECT AMOUNT, TIMESEC \
-                FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'cancel'";
-  result R=selectSQL(C, sql1);
-
-  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
-    ans+="    <canceled shares="+c[0].as<string>()+" time="+c[1].as<string>()+"/>\n";
-  }
-  return ans;
-}
-
-string query_execute(connection *C, int order_id){
-  string ans="";
-  string sql1 = "SELECT AMOUNT, TIMESEC, PRICE \
-                FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'";
-  result R=selectSQL(C, sql1);
-
-  for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
-    ans+="    <executed shares="+c[0].as<string>()+" price="+c[2].as<string>()+" time="+c[1].as<string>()+"/>\n";
-  }
-  return ans;
-}
-
-string query_error(connection *C, int order_id){
-  string sql1 = "SELECT * \
-                FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id);
-  result R=selectSQL(C, sql1);
-
-  if(R.size()==0){
-    return "  <error id=\""+to_string(order_id)+"\">No such trans_id</error>\n";
-  }
-  return "";
-}
-
-string query_body(connection *C, int order_id){
-  return query_open(C,order_id)+query_cancel(C,order_id)+query_execute(C,order_id);
-}
-
-string query(connection *C, int order_id){
-  string ans=query_error(C,order_id);
-  if(ans!=""){
-    return ans;
-  }
-  return "  <status id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </status>\n";
-}
-
-///////////////////////////////////////////////////////////////////////////////////////
-
-void refundMoney(connection *C, int account_id, float refund){
-  string sql="UPDATE ACCOUNT \
-              SET BALANCE = BALANCE + " + to_string(refund) +
-              "WHERE ACCOUNT_ID = " + to_string(account_id);
-  runSQL(sql, C);
-}
-/**/
-void refundStock(connection *C, int account_id, string symbol, int amount){
-  add_stock(C, account_id, symbol, amount);
-}
-
-string cancel(connection *C, int order_id){
-  string ans=query_error(C,order_id);
-  if(ans!=""){
-    return ans;
-  }
-  //already canceled
-  string sql1 = "SELECT * \
-                FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
-  result R=selectSQL(C, sql1);
-  if(R.size()<=0){
-    return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
-  }
-  //update order to cancel
-  string sql2="UPDATE ORDERS \
-              SET STATES=" + quoteStr(C, "cancel") +
-              "WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
-  runSQL(sql2, C);
-  //get refund value
-  string sql3 = "SELECT * \
-                FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "cancel");
-  result R2=selectSQL(C, sql3);
-  //refund
-  if(R[0][5].as<string>()=="buy"){
-    refundMoney(C, R2[0][1].as<int>(), R2[0][3].as<int>()*R2[0][4].as<float>());
-  }
-  else{
-    refundStock(C, R2[0][1].as<int>(), R2[0][2].as<string>(), R2[0][3].as<int>());
-  }
-
-  return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
 }
 /*
 void insertAccount(string fileName, connection *C){
