@@ -367,9 +367,9 @@ string cancel(connection *C, int order_id){
   //already canceled
   string sql1 = "SELECT * \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id);
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
   result R=selectSQL(C, sql1);
-  if(R.size()<0){
+  if(R.size()<=0){
     return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
   }
   //update order to cancel
@@ -392,7 +392,6 @@ string cancel(connection *C, int order_id){
 
   return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
 }
-
 /*
 void insertAccount(string fileName, connection *C){
   string line;

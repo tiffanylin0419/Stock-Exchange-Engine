@@ -109,6 +109,8 @@ int main (int argc, char *argv[])
   //cancel refund  
   cout<<cancel(C, 8);//money
   cout<<cancel(C, 3);//stock
+  //cancel twice no refund
+  cout<<cancel(C, 8);//money
   //cancel error
   cout<<cancel(C, 25);
 
