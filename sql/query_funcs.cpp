@@ -308,17 +308,16 @@ string query_error(connection *C, int order_id){
   return "";
 }
 
+string query_body(connection *C, int order_id){
+  return query_open(C,order_id)+query_cancel(C,order_id)+query_execute(C,order_id);
+}
+
 string query(connection *C, int order_id){
   string ans=query_error(C,order_id);
   if(ans!=""){
     return ans;
   }
-  ans="  <status id=\""+to_string(order_id)+"\">\n";
-  ans+=query_open(C,order_id);
-  ans+=query_cancel(C,order_id);
-  ans+=query_execute(C,order_id);
-  ans +="  </status>\n";
-  return ans;
+  return "  <status id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </status>\n";
 }
 
 string cancel(connection *C, int order_id){
@@ -326,12 +325,11 @@ string cancel(connection *C, int order_id){
   if(ans!=""){
     return ans;
   }
-  ans="  <status id=\""+to_string(order_id)+"\">\n";
-  ans+=query_open(C,order_id);
-  ans+=query_cancel(C,order_id);
-  ans+=query_execute(C,order_id);
-  ans +="  </status>\n";
-  return ans;
+  string sql="UPDATE ORDERS \
+              SET STATES=" + quoteStr(C, "cancel") +
+              "WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
+  runSQL(sql, C);
+  return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
 }
 
 /*

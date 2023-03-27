@@ -98,6 +98,10 @@ int main (int argc, char *argv[])
   cout<<query(C, 17);
   //check query error
   cout<<query(C, 24);
+  //check cancel
+  cout<<cancel(C, 8);
+  //check cancel error
+  cout<<cancel(C, 25);
 
   C->disconnect();
   return 0;
