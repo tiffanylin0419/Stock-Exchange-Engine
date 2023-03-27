@@ -1,14 +1,17 @@
 #include <iostream>
 #include <pqxx/pqxx>
 
+
 #include "query_funcs.h"
+#include "tool.h"
+
 
 using namespace std;
 using namespace pqxx;
 
+
 int main (int argc, char *argv[]) 
 {
-
   connection *C;
   try{
     C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
@@ -95,7 +98,7 @@ int main (int argc, char *argv[])
   cout<<query(C, 17);
   //check query error
   cout<<query(C, 24);
-  
+
   C->disconnect();
   return 0;
 }
