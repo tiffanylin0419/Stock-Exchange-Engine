@@ -110,7 +110,7 @@ void buyAll(connection *C, result::const_iterator buy, result::const_iterator se
               "WHERE ORDER_ID = " + sell[0].as<string>() + " AND TIME = " + quoteStr(C,sell[7].as<string>());
   runSQL(sql3, C);
   // sell insert executed (price depends)
-  insert_order(C, sell[0].as<int>(), sell[1].as<int>(), sell[2].as<string>(), sell[3].as<int>(), price, "sell", "execute");
+  insert_order(C, sell[0].as<int>(), sell[1].as<int>(), sell[2].as<string>(), buy[3].as<int>(), price, "sell", "execute");
   // buy update execute (price depends)
   string sql4="UPDATE ORDERS \
               SET TIME= NOW(), STATES = 'execute', PRICE = "+ to_string(price) +
@@ -125,7 +125,7 @@ void sellAll(connection *C, result::const_iterator buy, result::const_iterator s
               "WHERE ORDER_ID = " + buy[0].as<string>() + " AND TIME = " + quoteStr(C,buy[7].as<string>());
   runSQL(sql3, C);
   //buy insert execute (price depends)
-  insert_order(C, buy[0].as<int>(), buy[1].as<int>(), buy[2].as<string>(), buy[3].as<int>(), price, "buy", "execute");
+  insert_order(C, buy[0].as<int>(), buy[1].as<int>(), buy[2].as<string>(), sell[3].as<int>(), price, "buy", "execute");
   //sell update execute (price depends)
   string sql4="UPDATE ORDERS \
               SET TIME= NOW(), STATES = 'execute', PRICE = "+ to_string(price) +
@@ -190,6 +190,9 @@ int add_sell_order(connection *C, int account_id, string symbol, int amount, flo
   result::const_iterator c = R_buy.begin();
   while(true){
     if(amount == 0){ //done
+      string sql3="DELETE FROM ORDERS\
+                  WHERE ORDER_ID = " + to_string(R_sell.begin()[0]) + " AND AMOUNT = 0";
+      runSQL(sql3, C);
       break;
     }
     if(c == R_buy.end()){// no more to buy
@@ -298,17 +301,20 @@ string query_error(connection *C, int order_id){
   result R=selectSQL(C, sql1);
 
   if(R.size()==0){
-    return "error\n";
+    return "  <error id=\""+to_string(order_id)+"\">No such trans_id</error>\n";
   }
   return "";
 }
 
 string query(connection *C, int order_id){
-  string ans="  <status id=\""+to_string(order_id)+"\">\n";
+  string ans=query_error(C,order_id);
+  if(ans!=""){
+    return ans;
+  }
+  ans="  <status id=\""+to_string(order_id)+"\">\n";
   ans+=query_open(C,order_id);
   ans+=query_cancel(C,order_id);
   ans+=query_execute(C,order_id);
-  ans+=query_error(C,order_id);
   ans +="  </status>\n";
   return ans;
 }

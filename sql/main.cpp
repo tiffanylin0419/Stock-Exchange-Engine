@@ -73,7 +73,7 @@ int main (int argc, char *argv[])
   cout << add_stock(C, 1, "h", 19);
   cout << add_order(C, 1, "h", 3, -102);
   cout << add_order(C, 3, "h", 4, 101);
-  /*//check sell exact num
+  //check sell exact num
   cout << add_stock(C, 1, "i", 19);
   cout << add_order(C, 3, "i", 4, 101);
   cout << add_order(C, 1, "i", 4, -100);
@@ -92,18 +92,10 @@ int main (int argc, char *argv[])
   cout << add_order(C, 3, "l", 4, 101);
   cout << add_order(C, 1, "l", 3, -102);
   //check query many exec
-  cout << add_stock(C, 1, "m", 19);
-  cout << add_stock(C, 2, "m", 19);
-  cout << add_stock(C, 3, "m", 19);
-  cout << add_order(C, 4, "m", 7, 101);
-  cout << add_order(C, 1, "m", 1, -100);
-  cout << add_order(C, 2, "m", 2, -99);
-  cout << add_order(C, 3, "m", 2, -99);
-  cout<<query(C, 16);
+  cout<<query(C, 17);
   //check query error
-  cout<<query(C, 17);*/
-
-
+  cout<<query(C, 24);
+  
   C->disconnect();
   return 0;
 }
