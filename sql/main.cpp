@@ -52,13 +52,14 @@ int main (int argc, char *argv[])
   cout << add_stock(C, 3, "c", 9);
   //add repeated stock
   cout << add_stock(C, 3, "c", 10);
-  /*//add stock fail
+  //add stock fail
   cout << add_stock(C, -1, "a", 3);
   cout << add_stock(C, 3, "c", 0);
   //add order no account
   cout << add_order(C, -1, "d", 3, -3);
   //add order no stock
   cout << add_order(C, 1, "d", 3, -3);
+  cout << add_order(C, 3, "c", 20, -20);
   //add order no money
   cout << add_order(C, 2, "b", 8, 101);
   // add order amount <=0
@@ -105,10 +106,11 @@ int main (int argc, char *argv[])
   cout<<query(C, 17);
   //check query error
   cout<<query(C, 24);
-  //check cancel
-  cout<<cancel(C, 8);
-  //check cancel error
-  cout<<cancel(C, 25);*/
+  //cancel refund  
+  cout<<cancel(C, 8);//money
+  cout<<cancel(C, 3);//stock
+  //cancel error
+  cout<<cancel(C, 25);
 
   C->disconnect();
   return 0;

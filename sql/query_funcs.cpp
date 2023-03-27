@@ -23,6 +23,8 @@ string quoteStr(connection *C, string s){
   return N.quote(s);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
 void deleteTable(connection *C, string tableName){
   string sql = "DROP TABLE IF EXISTS " + tableName + " CASCADE;";
   runSQL(sql,C);
@@ -45,6 +47,8 @@ void createTable(string fileName, connection *C){
   runSQL(sql,C);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
 string add_account(connection *C, int account_id, float balance){
   string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
   result R=selectSQL(C,sql1);
@@ -61,6 +65,8 @@ string add_account(connection *C, int account_id, float balance){
   runSQL(sql2,C);
   return "  <created id=\""+to_string(account_id)+"\"/>\n";
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 string add_stock(connection *C, int account_id, string symbol, int amount){
   if(amount<=0){
@@ -90,6 +96,8 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
   }
   return "  <created sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 void insert_order(connection *C, int order_id, int account_id, string symbol, int amount, float price, string type, string states){
   if(order_id==0){
@@ -273,6 +281,8 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
   }  
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
 string query_open(connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT \
@@ -336,15 +346,50 @@ string query(connection *C, int order_id){
   return "  <status id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </status>\n";
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
+void refundMoney(connection *C, int account_id, float refund){
+  string sql="UPDATE ACCOUNT \
+              SET BALANCE = BALANCE + " + to_string(refund) +
+              "WHERE ACCOUNT_ID = " + to_string(account_id);
+  runSQL(sql, C);
+}
+/**/
+void refundStock(connection *C, int account_id, string symbol, int amount){
+  add_stock(C, account_id, symbol, amount);
+}
+
 string cancel(connection *C, int order_id){
   string ans=query_error(C,order_id);
   if(ans!=""){
     return ans;
   }
-  string sql="UPDATE ORDERS \
+  //already canceled
+  string sql1 = "SELECT * \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id);
+  result R=selectSQL(C, sql1);
+  if(R.size()<0){
+    return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
+  }
+  //update order to cancel
+  string sql2="UPDATE ORDERS \
               SET STATES=" + quoteStr(C, "cancel") +
               "WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
-  runSQL(sql, C);
+  runSQL(sql2, C);
+  //get refund value
+  string sql3 = "SELECT * \
+                FROM ORDERS \
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "cancel");
+  result R2=selectSQL(C, sql3);
+  //refund
+  if(R[0][5].as<string>()=="buy"){
+    refundMoney(C, R2[0][1].as<int>(), R2[0][3].as<int>()*R2[0][4].as<float>());
+  }
+  else{
+    refundStock(C, R2[0][1].as<int>(), R2[0][2].as<string>(), R2[0][3].as<int>());
+  }
+
   return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
 }
 
