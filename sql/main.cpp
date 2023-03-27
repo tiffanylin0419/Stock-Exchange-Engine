@@ -92,7 +92,7 @@ int main (int argc, char *argv[])
   //check sell all, buy left
   cout << add_stock(C, 1, "j", 19);
   cout << add_order(C, 3, "j", 4, 101);
-  cout << add_order(C, 1, "j", 3, -100);
+  //cout << add_order(C, 1, "j", 3, -100);
   //check buy all, sell left
   cout << add_stock(C, 4, "k", 19);
   cout << add_order(C, 2, "k", 2, 99);

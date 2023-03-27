@@ -253,7 +253,6 @@ void buyAll(connection *C, result::const_iterator buy, result::const_iterator se
               SET TIMESEC= "+to_string(getTime())+", STATES = 'execute', PRICE = "+ to_string(price) +
               "WHERE UNIQUE_ID = " + quoteStr(C,buy[8].as<string>());
   runSQL(sql4, C);
-  cout<<price*buy[3].as<int>()<<endl;
   refundMoney(C, sell[1].as<int>(), price*buy[3].as<int>());
   refundStock(C, buy[1].as<int>(), buy[2].as<string>(), buy[3].as<int>());
 }
@@ -304,11 +303,14 @@ int add_buy_order(connection *C, int account_id, string symbol, int amount, floa
     }
     if(amount < c[3].as<int>()){
       buyAll(C, R_buy.begin(),c, c[4].as<float>());
-      return R_buy[0][0].as<int>();
+      refundMoney(C, R_buy[0][1].as<int>(), (R_buy[0][4].as<float>()-c[4].as<float>())*amount);
+      return R_buy[0][0].as<int>();      
     }
     else{
       sellAll(C, R_buy.begin(),c, c[4].as<float>());
       amount-=c[3].as<int>();
+      refundMoney(C, R_buy[0][1].as<int>(), (R_buy[0][4].as<float>()-c[4].as<float>())*c[3].as<int>());
+      //refund $
     }
     ++c;
   }

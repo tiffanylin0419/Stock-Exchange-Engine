@@ -1,13 +1,10 @@
 todo:
-    SQL
-        add stock if exist add amount
-        transaction refund: sell get money, buy get stock, 先賣後買
-        cancel refund
     parse
     connect server client
     parallize
         Avoiding the read-modify-write cycle https://www.2ndquadrant.com/en/blog/postgresql-anti-patterns-read-modify-write-cycles/
         database concurrency https://neat-iodine-05e.notion.site/Tips-and-Resources-39a8775868a8480b8729405d89e384f9
+        cancel function need a lock
     testing: 
         functionality
         scalability(1, 2 or all 4 cores of your VM are visible to the threads of your process)
@@ -32,3 +29,10 @@ done:
     limit (save float, print int)
     price and balance is float
     condition check, ex. >0
+    parallel: 有人要cancel, order先改成cancel就不怕另一個人買走
+    cancel refund
+    cancel twice no refund
+    sell get money, buy get stock
+    buy then sell: return price difference to buyer
+    
+
