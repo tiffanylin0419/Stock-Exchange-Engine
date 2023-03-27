@@ -1,6 +1,4 @@
-
 #include "tool.h"
-
 
 string float_to_string(float value) {
   ostringstream ss;

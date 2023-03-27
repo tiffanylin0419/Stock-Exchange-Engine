@@ -1,9 +1,4 @@
 #include "query_funcs.h"
-#include "tool.h"
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <chrono>
 
 void runSQL(string sql, connection *C){
   work W(*C);

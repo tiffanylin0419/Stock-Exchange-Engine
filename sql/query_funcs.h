@@ -1,13 +1,7 @@
-#include <iostream>
-#include <pqxx/pqxx>
-#include <string>
-
-using namespace std;
-using namespace pqxx;
+#include "tool.h"
 
 #ifndef _QUERY_FUNCS_
 #define _QUERY_FUNCS_
-
 
 void deleteTable(connection *C, string tableName);
 void createTable(string fileName, connection *C);

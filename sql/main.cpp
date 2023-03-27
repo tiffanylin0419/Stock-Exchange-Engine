@@ -1,14 +1,4 @@
-#include <iostream>
-#include <pqxx/pqxx>
-
-
 #include "query_funcs.h"
-#include "tool.h"
-
-
-using namespace std;
-using namespace pqxx;
-
 
 int main (int argc, char *argv[]) 
 {
@@ -29,12 +19,12 @@ int main (int argc, char *argv[])
   deleteTable(C, "ACCOUNT");
   deleteTable(C, "STOCK");
   deleteTable(C, "ORDERS");
-  createTable("account.sql", C);
-  createTable("stock.sql", C);
-  createTable("order.sql", C);
-  /*insertAccount("account.txt", C);
-  insertStock("stock.txt", C);
-  insertOrder("order.txt", C);*/
+  createTable("file/account.sql", C);
+  createTable("file/stock.sql", C);
+  createTable("file/order.sql", C);
+  /*insertAccount("file/account.txt", C);
+  insertStock("file/stock.txt", C);
+  insertOrder("file/order.txt", C);*/
 
   // add account
   cout << add_account(C, 1, 40);
@@ -117,4 +107,3 @@ int main (int argc, char *argv[])
   C->disconnect();
   return 0;
 }
-
