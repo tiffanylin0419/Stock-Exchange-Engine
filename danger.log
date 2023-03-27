@@ -1,9 +1,13 @@
 todo:
 condition check, ex. >0
-
+add cancel功能
+price is float
+time is second from epoch
 
 check:
 want server to run forever: cannot return -1 in main
 
 
-problem: transaction_ID?
+problem:
+xml換行縮排有差嗎
+query error format
