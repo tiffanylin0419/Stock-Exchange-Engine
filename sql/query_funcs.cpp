@@ -145,7 +145,7 @@ int add_buy_order(connection *C, int account_id, string symbol, int amount, floa
   //get sell orders
   string sql1 = "SELECT * \
                 FROM ORDERS \
-                WHERE TYPES= 'sell' AND SYMBOL= " + quoteStr(C, symbol) +" AND PRICE < " + to_string(price) + " AND STATES = 'open'\
+                WHERE TYPES= 'sell' AND SYMBOL= " + quoteStr(C, symbol) +" AND PRICE <= " + to_string(price) + " AND STATES = 'open'\
                 ORDER BY PRICE ASC, TIMESEC ASC";
   result R_sell=selectSQL(C, sql1);
   
@@ -184,7 +184,7 @@ int add_sell_order(connection *C, int account_id, string symbol, int amount, flo
   //get buy orders
   string sql1 = "SELECT * \
                 FROM ORDERS \
-                WHERE TYPES= 'buy' AND SYMBOL= " + quoteStr(C, symbol) +" AND PRICE > " + to_string(price) + " AND STATES = 'open'\
+                WHERE TYPES= 'buy' AND SYMBOL= " + quoteStr(C, symbol) +" AND PRICE >= " + to_string(price) + " AND STATES = 'open'\
                 ORDER BY PRICE DESC, TIMESEC ASC";
   result R_buy=selectSQL(C, sql1);
   
