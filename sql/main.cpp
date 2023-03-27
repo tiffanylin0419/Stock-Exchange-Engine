@@ -43,6 +43,8 @@ int main (int argc, char *argv[])
   cout << add_account(C, 4, 30400);
   // add account fail
   cout << add_account(C, 1, 32);
+  cout << add_account(C, 9, 0);
+  cout << add_account(C, 9, -1);
   //add stock
   cout << add_stock(C, 1, "a", 3);
   cout << add_stock(C, 1, "b", 7);
@@ -50,12 +52,15 @@ int main (int argc, char *argv[])
   cout << add_stock(C, 3, "c", 9);
   //add stock fail
   cout << add_stock(C, -1, "a", 3);
+  cout << add_stock(C, 3, "c", 0);
   //add order no account
   cout << add_order(C, -1, "d", 3, -3);
   //add order no stock
   cout << add_order(C, 1, "d", 3, -3);
   //add order no money
   cout << add_order(C, 2, "b", 8, 101);
+  // add order amount <=0
+  cout << add_order(C, 2, "b", 0, 101);
   //check buy exact num
   cout << add_stock(C, 1, "e", 19);
   cout << add_order(C, 1, "e", 4, -100);

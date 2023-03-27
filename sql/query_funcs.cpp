@@ -51,6 +51,9 @@ string add_account(connection *C, int account_id, float balance){
   if(R.size()!=0){
     return "  <error id=\""+to_string(account_id)+"\">Account already exists</error>\n";
   }
+  if(balance<=0){
+    return "  <error id=\""+to_string(account_id)+"\">Balance cannot be smaller or equal to 0</error>\n";
+  }
 
   string sql2 = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" 
                 + to_string(account_id) + "," 
@@ -65,6 +68,9 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
   result R( N.exec( sql1 ));
   if(R.size()==0){
     return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
+  }
+  if(amount<=0){
+    return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Amount cannot be smaller or equal to 0</error>\n";
   }
   N.exec(sql1);
   N.commit();
@@ -219,7 +225,9 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
   if(R.size()==0){
     return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Account does not exist</error>\n";
   }
-  
+  if(amount<=0){
+    return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Amount cannot be smaller or equal to 0</error>\n";
+  }
   string type= "buy";
   if(price<0){
     type="sell";
