@@ -29,6 +29,13 @@ local all postgres md5
 sudo service postgresql restart
 ```
 
+### connect every time
+```
+sudo su - postgres
+psql
+\c EXCHANGE_SERVER
+SELECT * FROM STOCK;
+```
 
 ## Tables
 ACCOUNT: ACCOUNT_ID BALANCE

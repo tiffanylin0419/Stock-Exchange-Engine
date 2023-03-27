@@ -1,13 +1,34 @@
 todo:
-condition check, ex. >0
-add cancel功能
-price is float
-time is second from epoch
+    SQL
+        add stock if exist add amount
+        transaction refund: sell get money, buy get stock, 先賣後買
+        cancel refund
+    parse
+    connect server client
+    parallize
+        Avoiding the read-modify-write cycle https://www.2ndquadrant.com/en/blog/postgresql-anti-patterns-read-modify-write-cycles/
+        database concurrency https://neat-iodine-05e.notion.site/Tips-and-Resources-39a8775868a8480b8729405d89e384f9
+    testing: 
+        functionality
+        scalability(1, 2 or all 4 cores of your VM are visible to the threads of your process)
+            making the right number of cores are visible and exploring binding your process and thread(s) to specific cores: 
+                'taskset' command (see the —cpu-list option): https://www.howtoforge.com/linux-taskset-command/
+                'numactl' command: https://www.tutorialspoint.com/unix_commands/numactl.htm
+            limit server to running on a certain number of cores
+                `sudo apt-get install cgroup-tools`
+                `man cgexec`
+                Also: [https://www.baeldung.com/linux/limit-resource-consumption](https://www.baeldung.com/linux/limit-resource-consumption)
+    set up docker
+    report: graphs/analysis/comparisons/tables
 
 check:
-want server to run forever: cannot return -1 in main
+    want server to run forever: cannot return -1 in main
 
+question:
+    xml換行縮排有差嗎
+    query error format
 
-problem:
-xml換行縮排有差嗎
-query error format
+done: 
+    limit (save float, print int)
+    price and balance is float
+    condition check, ex. >0
