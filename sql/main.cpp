@@ -8,7 +8,7 @@ using namespace pqxx;
 
 int main (int argc, char *argv[]) 
 {
-  
+
   connection *C;
   try{
     C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
@@ -73,7 +73,7 @@ int main (int argc, char *argv[])
   cout << add_stock(C, 1, "h", 19);
   cout << add_order(C, 1, "h", 3, -102);
   cout << add_order(C, 3, "h", 4, 101);
-  //check sell exact num
+  /*//check sell exact num
   cout << add_stock(C, 1, "i", 19);
   cout << add_order(C, 3, "i", 4, 101);
   cout << add_order(C, 1, "i", 4, -100);
@@ -100,6 +100,9 @@ int main (int argc, char *argv[])
   cout << add_order(C, 2, "m", 2, -99);
   cout << add_order(C, 3, "m", 2, -99);
   cout<<query(C, 16);
+  //check query error
+  cout<<query(C, 17);*/
+
 
   C->disconnect();
   return 0;
