@@ -1,6 +1,8 @@
 todo:
     parse
-    connect server client: see 650proj3 ringmaster.cpp and player.cpp
+    connect server client
+        see 568 proj2 & 650 proj3
+        parsee xml object in client?
     parallize
         Avoiding the read-modify-write cycle https://www.2ndquadrant.com/en/blog/postgresql-anti-patterns-read-modify-write-cycles/
         database concurrency https://neat-iodine-05e.notion.site/Tips-and-Resources-39a8775868a8480b8729405d89e384f9

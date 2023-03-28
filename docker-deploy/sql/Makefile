@@ -4,7 +4,7 @@ EXTRAFLAGS=-lpqxx -lpq
 
 all: test
 
-test: main.cpp query_funcs.h query_funcs.cpp tool.h tool.cpp
+test: main.cpp query_funcs.h query_funcs.cpp tool.h tool.cpp head.h
 	$(CC) $(CFLAGS) -o test main.cpp query_funcs.cpp tool.cpp $(EXTRAFLAGS)
 
 clean:
