@@ -1,6 +1,6 @@
 todo:
     parse
-    connect server client
+    connect server client: see 650proj3 ringmaster.cpp and player.cpp
     parallize
         Avoiding the read-modify-write cycle https://www.2ndquadrant.com/en/blog/postgresql-anti-patterns-read-modify-write-cycles/
         database concurrency https://neat-iodine-05e.notion.site/Tips-and-Resources-39a8775868a8480b8729405d89e384f9
@@ -24,6 +24,7 @@ check:
 question:
     xml換行縮排有差嗎
     query error format
+    how many client, how to deal with this
 
 done: 
     limit (save float, print int)
