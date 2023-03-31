@@ -1,5 +1,63 @@
-#include "query_funcs.h"
+//#include "query_funcs.h"
+#include "parse.hpp"
+using namespace std;
+using namespace pqxx;
 
+
+int main(int argc, char *argv[])
+{
+  connection *C;
+  try{
+    C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
+    if (C->is_open()) {
+    } else {
+      cout << "Can't open database" << endl;
+      return 1;
+    }
+  } catch (const std::exception &e){
+    cerr << e.what() << std::endl;
+    return 1;
+  }
+  //Load XML file
+  //Test create request
+  cout << "Create request test starting!!!" << endl;
+  pugi::xml_document request_create_doc;
+  pugi::xml_document response_create_doc;
+  int creat_res;
+  request_create_doc.load_file("test1.xml");
+  creat_res = process_create(request_create_doc, response_create_doc,C);
+  if(creat_res == 0)
+    {
+      response_create_doc.print(std::cout);
+    }
+  else
+    {
+      cout << "Create request fail." << endl;
+      return -1;
+    }
+  cout << "Create request test end." << endl;
+  
+  //Test transaction request
+  cout << "Transaction request test starting!!!" << endl;
+  pugi::xml_document request_trans_doc;
+  pugi::xml_document response_trans_doc;
+  int trans_res;
+  request_trans_doc.load_file("test2.xml");
+  trans_res = process_transaction(request_trans_doc, response_trans_doc,C);
+  if(trans_res == 0)
+    {
+      response_trans_doc.print(std::cout);
+    }
+  else
+    {
+      cout << "Transaction request fail." << endl;
+      return -1;
+    }
+  cout << "Transaction request test end." << endl;
+  return 0;
+}
+
+/*
 int main (int argc, char *argv[]) 
 {
   connection *C;
@@ -22,9 +80,9 @@ int main (int argc, char *argv[])
   createTable("file/account.sql", C);
   createTable("file/stock.sql", C);
   createTable("file/order.sql", C);
-  /*insertAccount("file/account.txt", C);
-  insertStock("file/stock.txt", C);
-  insertOrder("file/order.txt", C);*/
+  //insertAccount("file/account.txt", C);
+  //insertStock("file/stock.txt", C);
+  //insertOrder("file/order.txt", C);
 
   // add account
   cout << add_account(C, 1, 40);
@@ -107,3 +165,4 @@ int main (int argc, char *argv[])
   C->disconnect();
   return 0;
 }
+*/
