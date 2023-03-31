@@ -7,17 +7,26 @@ using namespace pqxx;
 int main(int argc, char *argv[])
 {
   connection *C;
-  try{
+  try{ 
     C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
     if (C->is_open()) {
     } else {
       cout << "Can't open database" << endl;
       return 1;
-    }
+    } 
   } catch (const std::exception &e){
     cerr << e.what() << std::endl;
     return 1;
   }
+
+  deleteTable(C, "ACCOUNT");
+  deleteTable(C, "STOCK");
+  deleteTable(C, "ORDERS");
+  createTable("file/account.sql", C);
+  createTable("file/stock.sql", C);
+  createTable("file/order.sql", C);
+
+
   //Load XML file
   //Test create request
   cout << "Create request test starting!!!" << endl;
