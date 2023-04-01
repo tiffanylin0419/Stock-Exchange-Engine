@@ -29,8 +29,8 @@ using namespace std;
 //////main function//////
 string receive(int &client_fd);
 void send_response(int &client_fd, string &response_message);
-int process_create(pugi::xml_document &request_doc, pugi::xml_document &response_doc,connection* C);
-int process_transaction(pugi::xml_document &request_doc, pugi::xml_document &response_doc,connection *C);
+int process_create(pugi::xml_document &request_doc, string &response,connection* C);
+int process_transaction(pugi::xml_document &request_doc, string &response,connection *C);
 
 //////small function/////
 int getAccount_ID(pugi::xml_node &child);

@@ -208,11 +208,13 @@ int getTrans_ID(pugi::xml_node &child)
 }
 
 // traverse xml file, create account and symbol for each account
-int process_create(pugi::xml_document &request_doc, pugi:: xml_document &response_doc,connection* C) {
+int process_create(pugi::xml_document &request_doc, string &response,connection* C) {
   //std::lock_guard<std::mutex> lck (mtx);
 
   //pugi::xml_document response_doc;
-  pugi::xml_node response_head = response_doc.append_child("results");
+  //std :: string response;
+  response += "<results>\n";
+  //pugi::xml_node response_head = response_doc.append_child("results");
   pugi::xml_node request_head = request_doc.child("create");
   // process child node
   for (pugi::xml_node child : request_head.children()) {
@@ -225,7 +227,8 @@ int process_create(pugi::xml_document &request_doc, pugi:: xml_document &respons
       balance = getBalance(child);
       ///////Add new account to database////////
       std :: string account = add_account(C,account_id, balance);
-      pugi::xml_parse_result account_node = response_head.append_buffer(account.c_str(), account.length());
+      response += account;
+      //pugi::xml_parse_result account_node = response_head.append_buffer(account.c_str(), account.length());
     }
     else if(to_string(child.name()) == "symbol")
     {
@@ -236,7 +239,8 @@ int process_create(pugi::xml_document &request_doc, pugi:: xml_document &respons
         int amount = getNum(acc);
         //////Add stock to database//////
         std :: string stock = add_stock(C, acc_id, sym, amount);
-        pugi::xml_parse_result stock_node = response_head.append_buffer(stock.c_str(), stock.length());
+	response += stock;
+        //pugi::xml_parse_result stock_node = response_head.append_buffer(stock.c_str(), stock.length());
       }
     }
     else
@@ -245,16 +249,19 @@ int process_create(pugi::xml_document &request_doc, pugi:: xml_document &respons
       return -1;
     }
   }
+  response += "</results>";
   return 0;
 }
 
 
 // traverse xml file, order/query/cancel any order specified
-int process_transaction(pugi::xml_document &request_doc, pugi::xml_document &response_doc,connection *C) {
+int process_transaction(pugi::xml_document &request_doc, string &response,connection *C) {
   //std::lock_guard<std::mutex> lck (mtx);
 
   //pugi::xml_document response_doc;
-  pugi::xml_node response_head = response_doc.append_child("results");
+  //std :: string response;
+  response += "<results>\n";
+  //pugi::xml_node response_head = response_doc.append_child("results");
   pugi::xml_node request_head = request_doc.child("transactions");
 
   int account_id = getAccount_ID(request_head);
@@ -267,20 +274,22 @@ int process_transaction(pugi::xml_document &request_doc, pugi::xml_document &res
       int amount = getAmount(child);
       float limit = getLimit(child);
       std :: string order = add_order(C, account_id, sym, amount, limit);
-      pugi::xml_parse_result order_node = response_head.append_buffer(order.c_str(), order.length());
+      response += order;
+      //pugi::xml_parse_result order_node = response_head.append_buffer(order.c_str(), order.length());
     }
     else if(to_string(child.name()) == "query")
     {
       int trans_id = getTrans_ID(child);
       string quer = query(C, trans_id);
-      pugi::xml_parse_result query_node = response_head.append_buffer(quer.c_str(), quer.length());
+      response += quer;
+      //pugi::xml_parse_result query_node = response_head.append_buffer(quer.c_str(), quer.length());
     }
     else if(to_string(child.name()) == "cancel")
     {
       int trans_id = getTrans_ID(child);
       string canceled = cancel(C, trans_id);
-      //cout<<"\ntesting\n"<<canceled<<"\n"<<trans_id<<"\n";
-      pugi::xml_parse_result canceled_node = response_head.append_buffer(canceled.c_str(), canceled.length());
+      response += canceled;
+      //pugi::xml_parse_result canceled_node = response_head.append_buffer(canceled.c_str(), canceled.length());
     }
     else
     {
@@ -288,5 +297,6 @@ int process_transaction(pugi::xml_document &request_doc, pugi::xml_document &res
       return -1;
     }
   }
+  response += "</results>";
   return 0;
 }

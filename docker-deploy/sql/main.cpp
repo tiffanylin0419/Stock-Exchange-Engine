@@ -29,40 +29,69 @@ int main(int argc, char *argv[])
 
   //Load XML file
   //Test create request
-  cout << "Create request test starting!!!" << endl;
-  pugi::xml_document request_create_doc;
-  pugi::xml_document response_create_doc;
-  int creat_res;
-  request_create_doc.load_file("test1.xml");
-  creat_res = process_create(request_create_doc, response_create_doc,C);
-  if(creat_res == 0)
+  cout << "Request test starting!!!" << endl;
+  pugi::xml_document request_doc;
+  std :: string request = "";
+  std :: string response = "";
+  //buffer to receive string
+  //response = receive("test1.xml");
+  request += "<create>\n";
+  request += "</create>";
+  // load xml parser
+  pugi::xml_parse_result result = request_doc.load_string(request.c_str());
+
+
+  ////////Request///////
+  request_doc.print(std::cout);
+  cout << endl;
+  //request_create_doc.load_file("test1.xml");
+  if (!result || request == "") {
+    // error when parsing xml
+    cout << "error: parsing xml fail" << endl;
+    response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
+               "XML Format</error>\n";
+    //send_back(client_fd, response);
+    //close(client_fd);
+  }
+  else if(request_doc.child("create"))
     {
-      response_create_doc.print(std::cout);
+      int creat_res;
+      creat_res = process_create(request_doc, response,C);
+      if(creat_res == 0)
+      {
+	 //response_create_doc.print(std::cout);
+	cout << response << endl;
+      }
+      else
+	{
+	  cout << "Create request fail." << endl;
+	   return -1;
+	}
+      //cout << "Create request test end." << endl;
+    }
+  else if(request_doc.child("transactions"))
+    {
+      int trans_res;
+      trans_res = process_transaction(request_doc, response,C);
+      if(trans_res == 0)
+	{
+	  cout << response << endl;
+	}
+      else
+	{
+	  cout << "Transaction request fail." << endl;
+	   return -1;
+	}
+      //cout << "Transaction request test end." << endl;
     }
   else
     {
-      cout << "Create request fail." << endl;
-      return -1;
+      cout << "Illegal Request Tag" << endl;
+      response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
+               "XML Tag</error>\n";
     }
-  cout << "Create request test end." << endl;
-  
-  //Test transaction request
-  cout << "Transaction request test starting!!!" << endl;
-  pugi::xml_document request_trans_doc;
-  pugi::xml_document response_trans_doc;
-  int trans_res;
-  request_trans_doc.load_file("test2.xml");
-  trans_res = process_transaction(request_trans_doc, response_trans_doc,C);
-  if(trans_res == 0)
-    {
-      response_trans_doc.print(std::cout);
-    }
-  else
-    {
-      cout << "Transaction request fail." << endl;
-      return -1;
-    }
-  cout << "Transaction request test end." << endl;
+  //send_back(client_fd, response);
+  //close(client_fd);
   return 0;
 }
 
