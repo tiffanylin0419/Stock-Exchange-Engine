@@ -10,7 +10,7 @@ string add_account(connection *C, int account_id, float balance);
 string add_stock(connection *C, int account_id, string symbol, int amount);
 string add_order(connection *C, int account_id, string symbol, int amount, float price);
 string query(connection *C, int order_id);
-string cancel(connection *C, int order_id);
+string cancel(connection *C, int account_id, int order_id);
 
 /*
 void insertAccount(string fileName, connection *C);

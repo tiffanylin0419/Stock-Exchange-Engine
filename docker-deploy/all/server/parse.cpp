@@ -287,7 +287,7 @@ int process_transaction(pugi::xml_document &request_doc, string &response,connec
     else if(to_string(child.name()) == "cancel")
     {
       int trans_id = getTrans_ID(child);
-      string canceled = cancel(C, trans_id);
+      string canceled = cancel(C, account_id, trans_id);
       response += canceled;
       //pugi::xml_parse_result canceled_node = response_head.append_buffer(canceled.c_str(), canceled.length());
     }

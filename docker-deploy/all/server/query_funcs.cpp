@@ -171,7 +171,7 @@ void refundStock(connection *C, int account_id, string symbol, int amount){
   add_stock(C, account_id, symbol, amount);
 }
 
-string cancel(connection *C, int order_id){
+string cancel(connection *C, int account_id, int order_id){
   string ans=query_error(C,order_id);
   if(ans!=""){
     return ans;
@@ -183,6 +183,9 @@ string cancel(connection *C, int order_id){
   result R=selectSQL(C, sql1);
   if(R.size()<=0){
     return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
+  }
+  if(R[0][1].as<int>()!=account_id){
+    return "  <error id=\""+to_string(order_id)+"\">Account does not own this transaction</error>\n";
   }
   //update order to cancel
   string sql2="UPDATE ORDERS \

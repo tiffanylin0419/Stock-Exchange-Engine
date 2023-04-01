@@ -100,12 +100,14 @@ int main (int argc, char *argv[])
   //check query error
   cout<<query(C, 24);
   //cancel refund  
-  cout<<cancel(C, 8);//money
-  cout<<cancel(C, 3);//stock
+  cout<<cancel(C, 4, 8);//money
+  cout<<cancel(C, 1, 3);//stock
   //cancel twice no refund
-  cout<<cancel(C, 8);//money
-  //cancel error
-  cout<<cancel(C, 25);
+  cout<<cancel(C, 4, 8);//money
+  //cancel error no transid
+  cout<<cancel(C, 1, 25);
+  //cancel error not owner
+  cout<<cancel(C, 4, 10);
 
   C->disconnect();
   return 0;
