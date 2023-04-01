@@ -28,8 +28,13 @@ void Server::run(connection *C) {
     memset(buffer, 0, sizeof(buffer));//clear buffer
     recv(client_fd, &l,  sizeof(l), 0);
     recv(client_fd, buffer,  l, 0);
-    cout<<"\nrequestTest\n"<<buffer<<"\nrequestTest\n";
-    cout<<requestToResponse(C, buffer)<<endl<<endl;
+    //cout<<"\nrequestTest\n"<<buffer<<"\nrequestTest\n";
+    //cout<<requestToResponse(C, buffer)<<endl<<endl;
+    string response=requestToResponse(C, buffer);
+    l=response.length();
+    send(client_fd, &l, sizeof(l), 0);
+    send(client_fd, response.c_str(), l, 0);
+
   }
   close(temp_fd);
 }

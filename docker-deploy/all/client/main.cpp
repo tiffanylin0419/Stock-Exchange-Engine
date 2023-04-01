@@ -30,11 +30,14 @@ int main(int argc, char * argv[]) {
   int server_fd = setup_client("127.0.0.1", "12345");
 
   string request=read_file_to_string("test2.xml");
-  cout<<request<<endl<<endl;
   int l=request.length();
   send(server_fd, &l, sizeof(l), 0);
-
   send(server_fd, request.c_str(), l, 0);
 
+  char buffer[1024];
+  memset(buffer, 0, sizeof(buffer));//clear buffer
+  recv(server_fd, &l,  sizeof(l), 0);
+  recv(server_fd, buffer,  l, 0);
+  cout<<buffer<<endl;
   exit(EXIT_SUCCESS);
 }

@@ -3,5 +3,8 @@
   <query id="1"/>
   <order sym="SYM" amount="102" limit="10"/>
   <query id="2"/>
-  <cancel id="2"/>
+  <query id="3"/>
+  <query id="4"/>
+  <query id="5"/>
+  <cancel id="6"/>
 </transactions>
