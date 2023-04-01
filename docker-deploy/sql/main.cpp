@@ -4,6 +4,44 @@ using namespace std;
 using namespace pqxx;
 
 
+string requestToResponse(connection *C, string request){
+  pugi::xml_document request_doc;
+  // load xml parser
+  pugi::xml_parse_result result = request_doc.load_string(request.c_str());
+  std :: string response = "";
+  if (!result || request == "") {
+    // error when parsing xml
+    cout << "error: parsing xml fail" << endl;
+    response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
+               "XML Format</error>\n";
+  }
+  else if(request_doc.child("create")){
+    int creat_res;
+    creat_res = process_create(request_doc, response,C);
+    if(creat_res == 0)
+    {
+      return response;
+    }
+    else{
+      return "Create request fail.";
+    }
+  }
+  else if(request_doc.child("transactions")){
+    int trans_res;
+    trans_res = process_transaction(request_doc, response,C);
+    if(trans_res == 0){
+      return response;
+    }
+    else{
+      return "Transaction request fail.";
+    }
+  }
+  else{
+    response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
+              "XML Tag</error>\n";
+  }
+  return "wierd format XML";
+}
 int main(int argc, char *argv[])
 {
   connection *C;
@@ -27,64 +65,17 @@ int main(int argc, char *argv[])
   createTable("file/order.sql", C);
 
 
-  //Load XML file
-  //Test create request
-  cout << "Request test starting!!!" << endl;
-  pugi::xml_document request_doc;
   string request=read_file_to_string("test1.xml");
-  
-  // load xml parser
-  pugi::xml_parse_result result = request_doc.load_string(request.c_str());
-  ////////Request///////
   cout<<request<<endl<<endl;
-  std :: string response = "";
-  if (!result || request == "") {
-    // error when parsing xml
-    cout << "error: parsing xml fail" << endl;
-    response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
-               "XML Format</error>\n";
-    //send_back(client_fd, response);
-    //close(client_fd);
-  }
-  else if(request_doc.child("create"))
-    {
-      int creat_res;
-      creat_res = process_create(request_doc, response,C);
-      if(creat_res == 0)
-      {
-        //response_create_doc.print(std::cout);
-        cout << response << endl;
-      }
-      else
-	{
-	  cout << "Create request fail." << endl;
-	   return -1;
-	}
-      //cout << "Create request test end." << endl;
-    }
-  else if(request_doc.child("transactions"))
-    {
-      int trans_res;
-      trans_res = process_transaction(request_doc, response,C);
-      if(trans_res == 0){
-        cout << response << endl;
-      }
-      else
-	{
-	  cout << "Transaction request fail." << endl;
-	  return -1;
-	}
-      //cout << "Transaction request test end." << endl;
-    }
-  else
-    {
-      cout << "Illegal Request Tag" << endl;
-      response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
-               "XML Tag</error>\n";
-    }
+  cout<<requestToResponse(C, request)<<endl<<endl;
+
+  request=read_file_to_string("test2.xml");
+  cout<<request<<endl<<endl;
+  cout<<requestToResponse(C, request)<<endl<<endl;
+
+
   //send_back(client_fd, response);
   //close(client_fd);
-  
   return 0;
 }
 
