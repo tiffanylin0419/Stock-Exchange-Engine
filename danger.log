@@ -1,5 +1,4 @@
 todo:
-    parse
     connect server client
         see 568 proj2 & 650 proj3
         parsee xml object in client?
