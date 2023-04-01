@@ -1,85 +1,5 @@
-//#include "query_funcs.h"
-#include "parse.hpp"
-using namespace std;
-using namespace pqxx;
+#include "query_funcs.h"
 
-
-string requestToResponse(connection *C, string request){
-  pugi::xml_document request_doc;
-  // load xml parser
-  pugi::xml_parse_result result = request_doc.load_string(request.c_str());
-  std :: string response = "";
-  if (!result || request == "") {
-    // error when parsing xml
-    cout << "error: parsing xml fail" << endl;
-    response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
-               "XML Format</error>\n";
-  }
-  else if(request_doc.child("create")){
-    int creat_res;
-    creat_res = process_create(request_doc, response,C);
-    if(creat_res == 0)
-    {
-      return response;
-    }
-    else{
-      return "Create request fail.";
-    }
-  }
-  else if(request_doc.child("transactions")){
-    int trans_res;
-    trans_res = process_transaction(request_doc, response,C);
-    if(trans_res == 0){
-      return response;
-    }
-    else{
-      return "Transaction request fail.";
-    }
-  }
-  else{
-    response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
-              "XML Tag</error>\n";
-  }
-  return "wierd format XML";
-}
-int main(int argc, char *argv[])
-{
-  connection *C;
-  try{ 
-    C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
-    if (C->is_open()) {
-    } else {
-      cout << "Can't open database" << endl;
-      return 1;
-    } 
-  } catch (const std::exception &e){
-    cerr << e.what() << std::endl;
-    return 1;
-  }
-
-  deleteTable(C, "ACCOUNT");
-  deleteTable(C, "STOCK");
-  deleteTable(C, "ORDERS");
-  createTable("file/account.sql", C);
-  createTable("file/stock.sql", C);
-  createTable("file/order.sql", C);
-
-
-  string request=read_file_to_string("test1.xml");
-  cout<<request<<endl<<endl;
-  cout<<requestToResponse(C, request)<<endl<<endl;
-
-  request=read_file_to_string("test2.xml");
-  cout<<request<<endl<<endl;
-  cout<<requestToResponse(C, request)<<endl<<endl;
-
-
-  //send_back(client_fd, response);
-  //close(client_fd);
-  return 0;
-}
-
-/*
 int main (int argc, char *argv[]) 
 {
   connection *C;
@@ -187,4 +107,3 @@ int main (int argc, char *argv[])
   C->disconnect();
   return 0;
 }
-*/

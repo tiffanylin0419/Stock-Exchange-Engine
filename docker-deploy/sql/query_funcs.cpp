@@ -396,6 +396,9 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
     }
   }  
 }
+
+
+
 /*
 void insertAccount(string fileName, connection *C){
   string line;
