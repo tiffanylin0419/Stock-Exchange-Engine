@@ -16,6 +16,8 @@
 #include <netinet/in.h>
 
 
-
+#include <fstream>
+#include <sstream>
+#include <string>
 
 using namespace std;
