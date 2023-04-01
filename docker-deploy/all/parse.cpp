@@ -300,3 +300,44 @@ int process_transaction(pugi::xml_document &request_doc, string &response,connec
   response += "</results>";
   return 0;
 }
+
+
+
+string requestToResponse(connection *C, string request){
+  pugi::xml_document request_doc;
+  // load xml parser
+  pugi::xml_parse_result result = request_doc.load_string(request.c_str());
+  std :: string response = "";
+  if (!result || request == "") {
+    // error when parsing xml
+    cout << "error: parsing xml fail" << endl;
+    response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
+               "XML Format</error>\n";
+  }
+  else if(request_doc.child("create")){
+    int creat_res;
+    creat_res = process_create(request_doc, response,C);
+    if(creat_res == 0)
+    {
+      return response;
+    }
+    else{
+      return "Create request fail.";
+    }
+  }
+  else if(request_doc.child("transactions")){
+    int trans_res;
+    trans_res = process_transaction(request_doc, response,C);
+    if(trans_res == 0){
+      return response;
+    }
+    else{
+      return "Transaction request fail.";
+    }
+  }
+  else{
+    response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>Illegal "
+              "XML Tag</error>\n";
+  }
+  return "wierd format XML";
+}

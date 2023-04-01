@@ -40,4 +40,6 @@ int getNum(pugi::xml_node &acc);
 int getAmount(pugi::xml_node &child);
 float getLimit(pugi::xml_node &child);
 int getTrans_ID(pugi::xml_node &child);
+
+string requestToResponse(connection *C, string request);
 #endif

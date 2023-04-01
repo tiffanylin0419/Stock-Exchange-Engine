@@ -29,9 +29,12 @@ int main(int argc, char * argv[]) {
   //int server_fd = setup_client(argv[1], argv[2]);
   int server_fd = setup_client("127.0.0.1", "12345");
 
-  string request=read_file_to_string("test1.xml");
+  string request=read_file_to_string("test2.xml");
   cout<<request<<endl<<endl;
-  send(server_fd, request.c_str(), request.length(), 0);
+  int l=request.length();
+  send(server_fd, &l, sizeof(l), 0);
+
+  send(server_fd, request.c_str(), l, 0);
 
   exit(EXIT_SUCCESS);
 }
