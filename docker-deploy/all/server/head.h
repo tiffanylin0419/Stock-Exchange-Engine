@@ -1,5 +1,3 @@
-using namespace std;
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -20,4 +18,15 @@ using namespace std;
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <pqxx/pqxx>
+#include <ctime>
+#include <iomanip>
+
 using namespace std;
+using namespace pqxx;
