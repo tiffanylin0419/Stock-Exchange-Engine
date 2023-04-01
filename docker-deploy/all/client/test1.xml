@@ -1,9 +1,0 @@
-<create>
-  <account id="1" balance="6021"/>
-  <account id="1234567" balance="2000"/>
-  <symbol sym="SPY">
-    <account id="123456">100000</account>
-    <account id="1234568">100000</account>
-    <account id="1234567">100000</account>
-  </symbol>
-</create>
