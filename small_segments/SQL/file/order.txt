@@ -1,0 +1,3 @@
+11 stock1 3 3 open
+12 BTS 3 101 open
+11 BTS 4 -100 open

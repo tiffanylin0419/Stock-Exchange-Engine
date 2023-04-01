@@ -1,11 +1,6 @@
 todo:
-    connect server client
-        see 568 proj2 & 650 proj3
-        parsee xml object in client?
-    parallize
-        Avoiding the read-modify-write cycle https://www.2ndquadrant.com/en/blog/postgresql-anti-patterns-read-modify-write-cycles/
-        database concurrency https://neat-iodine-05e.notion.site/Tips-and-Resources-39a8775868a8480b8729405d89e384f9
-        cancel function need a lock
+    error output
+    xml repeat: buffer overflow detected ***: terminated (not good)
     testing: 
         functionality
         scalability(1, 2 or all 4 cores of your VM are visible to the threads of your process)
@@ -36,5 +31,7 @@ done:
     cancel twice no refund
     sell get money, buy get stock
     buy then sell: return price difference to buyer
+    When cancel the order, verify that this transaction we are cancelling is created by the account_id
+    add Row level locking for parallize
     
 

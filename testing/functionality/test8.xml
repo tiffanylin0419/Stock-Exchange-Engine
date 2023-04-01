@@ -1,0 +1,14 @@
+
+<transactions id="3">
+  <!--buy exact num-->    
+  <order sym="e" amount="4" limit="101"/><!--8-->   
+  <!--buy all, sell left-->
+  <order sym="f" amount="3" limit="101"/><!--9-->   
+  <order sym="g" amount="2" limit="-99"/><!--10-->  
+  <!--too expensive to buy-->    
+  <order sym="h" amount="4" limit="101"/><!--11-->  
+  <order sym="i" amount="4" limit="101"/><!--12-->   
+  <order sym="j" amount="4" limit="101"/><!--13-->   
+  <order sym="k" amount="2" limit="99"/><!--14-->   
+  <order sym="l" amount="4" limit="101"/><!--15-->   
+</transactions>
