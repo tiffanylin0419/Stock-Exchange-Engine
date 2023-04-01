@@ -31,20 +31,13 @@ int main(int argc, char *argv[])
   //Test create request
   cout << "Request test starting!!!" << endl;
   pugi::xml_document request_doc;
-  std :: string request = "";
-  std :: string response = "";
-  //buffer to receive string
-  //response = receive("test1.xml");
-  request += "<create>\n";
-  request += "</create>";
+  string request=read_file_to_string("test1.xml");
+  
   // load xml parser
   pugi::xml_parse_result result = request_doc.load_string(request.c_str());
-
-
   ////////Request///////
-  request_doc.print(std::cout);
-  cout << endl;
-  //request_create_doc.load_file("test1.xml");
+  cout<<request<<endl<<endl;
+  std :: string response = "";
   if (!result || request == "") {
     // error when parsing xml
     cout << "error: parsing xml fail" << endl;
@@ -59,8 +52,8 @@ int main(int argc, char *argv[])
       creat_res = process_create(request_doc, response,C);
       if(creat_res == 0)
       {
-	 //response_create_doc.print(std::cout);
-	cout << response << endl;
+        //response_create_doc.print(std::cout);
+        cout << response << endl;
       }
       else
 	{
@@ -73,14 +66,13 @@ int main(int argc, char *argv[])
     {
       int trans_res;
       trans_res = process_transaction(request_doc, response,C);
-      if(trans_res == 0)
-	{
-	  cout << response << endl;
-	}
+      if(trans_res == 0){
+        cout << response << endl;
+      }
       else
 	{
 	  cout << "Transaction request fail." << endl;
-	   return -1;
+	  return -1;
 	}
       //cout << "Transaction request test end." << endl;
     }
@@ -92,6 +84,7 @@ int main(int argc, char *argv[])
     }
   //send_back(client_fd, response);
   //close(client_fd);
+  
   return 0;
 }
 
