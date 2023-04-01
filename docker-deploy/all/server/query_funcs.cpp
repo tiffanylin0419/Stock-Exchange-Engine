@@ -45,7 +45,7 @@ void createTable(string fileName, connection *C){
 ///////////////////////////////////////////////////////////////////////////////////////
 
 string add_account(connection *C, int account_id, float balance){
-  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
+  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id)+ " FOR UPDATE";
   result R=selectSQL(C,sql1);
   if(R.size()!=0){
     return "  <error id=\""+to_string(account_id)+"\">Account already exists</error>\n";
@@ -68,14 +68,16 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
     return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Amount cannot be smaller or equal to 0</error>\n";
   }
   //check account exist
-  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ quoteStr(C, to_string(account_id));
+  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ quoteStr(C, to_string(account_id))
+                + " FOR UPDATE";
   result R=selectSQL(C, sql1 );
   if(R.size()==0){
     return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
   }
   
   string sql2 = "SELECT STOCK_ID FROM STOCK \
-                WHERE ACCOUNT_ID= " + quoteStr(C, to_string(account_id)) + " AND SYMBOL = " + quoteStr(C, symbol);
+                WHERE ACCOUNT_ID= " + quoteStr(C, to_string(account_id)) + " AND SYMBOL = " + quoteStr(C, symbol)
+                + " FOR UPDATE";
   result R2 = selectSQL(C, sql2);
   if(R2.size()==0){//stock does not exist->insert
     string sql = "INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
@@ -99,7 +101,8 @@ string query_open(connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'open'";
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'open'"
+                + " FOR UPDATE";
   result R=selectSQL(C, sql1);
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
@@ -112,7 +115,8 @@ string query_cancel(connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT, TIMESEC \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'cancel'";
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'cancel'"
+                + " FOR UPDATE";
   result R=selectSQL(C, sql1);
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
@@ -125,7 +129,8 @@ string query_execute(connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT, TIMESEC, PRICE \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'";
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'"
+                + " FOR UPDATE";
   result R=selectSQL(C, sql1);
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
@@ -137,7 +142,8 @@ string query_execute(connection *C, int order_id){
 string query_error(connection *C, int order_id){
   string sql1 = "SELECT * \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id);
+                WHERE ORDER_ID = " + to_string(order_id)
+                + " FOR UPDATE";
   result R=selectSQL(C, sql1);
 
   if(R.size()==0){
@@ -179,7 +185,8 @@ string cancel(connection *C, int account_id, int order_id){
   //already canceled
   string sql1 = "SELECT * \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open") 
+                + " FOR UPDATE";
   result R=selectSQL(C, sql1);
   if(R.size()<=0){
     return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
@@ -195,7 +202,8 @@ string cancel(connection *C, int account_id, int order_id){
   //get refund value
   string sql3 = "SELECT * \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "cancel");
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "cancel")
+                + " FOR UPDATE";
   result R2=selectSQL(C, sql3);
   //refund
   if(R[0][5].as<string>()=="buy"){
@@ -278,16 +286,18 @@ int add_buy_order(connection *C, int account_id, string symbol, int amount, floa
   string sql1 = "SELECT * \
                 FROM ORDERS \
                 WHERE TYPES= 'sell' AND SYMBOL= " + quoteStr(C, symbol) +" AND PRICE <= " + to_string(price) + " AND STATES = 'open'\
-                ORDER BY PRICE ASC, TIMESEC ASC";
+                ORDER BY PRICE ASC, TIMESEC ASC"
+                + " FOR UPDATE";
   result R_sell=selectSQL(C, sql1);
   
-  result num=selectSQL(C, "SELECT lastval();");
+  result num=selectSQL(C, "SELECT lastval() FOR UPDATE;");
   result::const_iterator c = R_sell.begin();
   while(true){
     //get buy order
     string sql2 = "SELECT * \
                   FROM ORDERS \
-                  WHERE UNIQUE_ID = " + num[0][0].as<string>();
+                  WHERE UNIQUE_ID = " + num[0][0].as<string>()
+                  + " FOR UPDATE";
     result R_buy=selectSQL(C, sql2);
 
     if(amount == 0){
@@ -320,16 +330,18 @@ int add_sell_order(connection *C, int account_id, string symbol, int amount, flo
   string sql1 = "SELECT * \
                 FROM ORDERS \
                 WHERE TYPES= 'buy' AND SYMBOL= " + quoteStr(C, symbol) +" AND PRICE >= " + to_string(price) + " AND STATES = 'open'\
-                ORDER BY PRICE DESC, TIMESEC ASC";
+                ORDER BY PRICE DESC, TIMESEC ASC"
+                + " FOR UPDATE";
   result R_buy=selectSQL(C, sql1);
   
-  result num=selectSQL(C, "SELECT lastval();");
+  result num=selectSQL(C, "SELECT lastval() FOR UPDATE;");
   result::const_iterator c = R_buy.begin();
   while(true){
     //get sell order
     string sql2 = "SELECT * \
                   FROM ORDERS \
-                  WHERE UNIQUE_ID = " + num[0][0].as<string>();
+                  WHERE UNIQUE_ID = " + num[0][0].as<string>()
+                  + " FOR UPDATE";
     result R_sell=selectSQL(C, sql2);
 
     if(amount == 0){ //done
@@ -355,7 +367,7 @@ int add_sell_order(connection *C, int account_id, string symbol, int amount, flo
 }
 
 string add_order(connection *C, int account_id, string symbol, int amount, float price){
-  string sql1 = "SELECT ACCOUNT_ID, BALANCE FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
+  string sql1 = "SELECT ACCOUNT_ID, BALANCE FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id) + " FOR UPDATE";
   result R=selectSQL(C, sql1);
   if(R.size()==0){
     return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Account does not exist</error>\n";
@@ -384,7 +396,8 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
   else{//sell
     string sql3 = "SELECT STOCK_ID, AMOUNT \
                     FROM STOCK \
-                    WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + quoteStr(C,symbol);
+                    WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + quoteStr(C,symbol)
+                    + " FOR UPDATE";
     result R2=selectSQL(C,sql3);
     if(R2.size()<1 || amount > R2.begin()[1].as<int>()){
       return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Not enough stocks</error>\n";
