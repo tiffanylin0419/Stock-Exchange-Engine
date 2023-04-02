@@ -188,8 +188,7 @@ string cancel(connection *C, int account_id, int order_id){
   //get refund value
   string sql3 = "SELECT * \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "cancel")
-                + " FOR UPDATE";
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "cancel");
   result R2=selectSQL(C, sql3);
   //refund
   if(R[0][5].as<string>()=="buy"){
