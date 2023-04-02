@@ -39,7 +39,7 @@ int main (int argc, char *argv[])
   cout << add_account(C, 9, 0);
   cout << add_account(C, 9, -1);
   //add stock
-  /*cout << add_stock(C, 1, "a", 3);
+  cout << add_stock(C, 1, "a", 3);
   cout << add_stock(C, 1, "b", 7);
   cout << add_stock(C, 2, "c", 9);
   cout << add_stock(C, 3, "c", 9);
@@ -107,7 +107,7 @@ int main (int argc, char *argv[])
   //cancel error no transid
   cout<<cancel(C, 1, 25);
   //cancel error not owner
-  cout<<cancel(C, 4, 10);*/
+  cout<<cancel(C, 4, 10);
 
   C->disconnect();
   return 0;

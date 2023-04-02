@@ -74,28 +74,23 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
     return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
   }
   // if exist, update, if not, insert
-  string sql = "IF EXISTS (SELECT STOCK_ID FROM STOCK \
-                            WHERE ACCOUNT_ID= " + quoteStr(C, to_string(account_id)) + " AND SYMBOL = " + quoteStr(C, symbol)+")" 
-                  +"UPDATE STOCK \
-                    SET AMOUNT=AMOUNT+" + to_string(amount) +
-                    "WHERE ACCOUNT_ID= " + quoteStr(C, to_string(account_id)) + " AND SYMBOL = " + quoteStr(C, symbol)
-                +" ELSE "
-                  +"INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
+  string sql = "INSERT INTO STOCK (ACCOUNT_ID, SYMBOL, AMOUNT) VALUES (" 
                   + to_string(account_id) + "," 
                   + quoteStr(C,symbol) + "," 
-                  + to_string(amount) + ");";
+                  + to_string(amount) + ") "
+                  + "ON CONFLICT (ACCOUNT_ID, SYMBOL) DO UPDATE SET AMOUNT = STOCK.AMOUNT + " + to_string(amount)+";";
   runSQL(sql,C);
   return "  <created sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\"/>\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-string query_open(connection *C, int order_id){
+string query_open(work& W, connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT \
                 FROM ORDERS \
                 WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'open'";
-  result R=selectSQL(C, sql1);
+  result R(W.exec(sql1));
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
     ans+="    <open shares="+c[0].as<string>()+"/>\n";
@@ -103,12 +98,12 @@ string query_open(connection *C, int order_id){
   return ans;
 }
 
-string query_cancel(connection *C, int order_id){
+string query_cancel(work& W, connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT, TIMESEC \
                 FROM ORDERS \
                 WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'cancel'";
-  result R=selectSQL(C, sql1);
+  result R(W.exec(sql1));
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
     ans+="    <canceled shares="+c[0].as<string>()+" time="+c[1].as<string>()+"/>\n";
@@ -116,12 +111,12 @@ string query_cancel(connection *C, int order_id){
   return ans;
 }
 
-string query_execute(connection *C, int order_id){
+string query_execute(work& W, connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT, TIMESEC, PRICE \
                 FROM ORDERS \
                 WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'";
-  result R=selectSQL(C, sql1);
+  result R(W.exec(sql1));
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
     ans+="    <executed shares="+c[0].as<string>()+" price="+c[2].as<string>()+" time="+c[1].as<string>()+"/>\n";
@@ -142,7 +137,9 @@ string query_error(connection *C, int order_id){
 }
 
 string query_body(connection *C, int order_id){
-  return query_open(C,order_id)+query_cancel(C,order_id)+query_execute(C,order_id);
+  work W(*C);
+  return query_open(W, C,order_id)+query_cancel(W, C,order_id)+query_execute(W, C,order_id);
+  W.commit();
 }
 
 string query(connection *C, int order_id){
