@@ -9,7 +9,6 @@ void runSQL(string sql, connection *C){
 result selectSQL(connection *C, string sql){
   nontransaction N(*C);
   result R( N.exec( sql ));
-  N.commit();
   return R;
 }
 
@@ -45,7 +44,7 @@ void createTable(string fileName, connection *C){
 ///////////////////////////////////////////////////////////////////////////////////////
 
 string add_account(connection *C, int account_id, float balance){
-  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id)+ " FOR UPDATE";
+  string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
   result R=selectSQL(C,sql1);
   if(R.size()!=0){
     return "  <error id=\""+to_string(account_id)+"\">Account already exists</error>\n";
@@ -101,8 +100,7 @@ string query_open(connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'open'"
-                + " FOR UPDATE";
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'open'";
   result R=selectSQL(C, sql1);
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
@@ -115,8 +113,7 @@ string query_cancel(connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT, TIMESEC \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'cancel'"
-                + " FOR UPDATE";
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'cancel'";
   result R=selectSQL(C, sql1);
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
@@ -129,8 +126,7 @@ string query_execute(connection *C, int order_id){
   string ans="";
   string sql1 = "SELECT AMOUNT, TIMESEC, PRICE \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'"
-                + " FOR UPDATE";
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = 'execute'";
   result R=selectSQL(C, sql1);
 
   for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
