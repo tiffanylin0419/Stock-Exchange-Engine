@@ -50,3 +50,5 @@ ORDER: ORDER_ID ACCOUNT_ID SYMBOL AMOUNT PRICE STATE TIME
 <img width="826" alt="截圖 2023-03-27 上午12 28 08" src="https://user-images.githubusercontent.com/88768257/227841147-9a061b8f-9f73-4119-82a8-47d70002d018.png">
 
 
+## reference
+[taskset](https://www.howtoforge.com/linux-taskset-command/) for multi core
