@@ -17,6 +17,10 @@ string quoteStr(connection *C, string s){
   return N.quote(s);
 }
 
+string WquoteStr(work &W, string s){
+  return W.quote(s);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
 void deleteTable(connection *C, string tableName){
@@ -168,11 +172,11 @@ string cancel(connection *C, int account_id, int order_id){
   if(ans!=""){
     return ans;
   }
+
   //already canceled
   string sql1 = "SELECT * \
                 FROM ORDERS \
-                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open") 
-                + " FOR UPDATE";
+                WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
   result R=selectSQL(C, sql1);
   if(R.size()<=0){
     return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
@@ -180,11 +184,13 @@ string cancel(connection *C, int account_id, int order_id){
   if(R[0][1].as<int>()!=account_id){
     return "  <error id=\""+to_string(order_id)+"\">Account does not own this transaction</error>\n";
   }
+
   //update order to cancel
   string sql2="UPDATE ORDERS \
               SET STATES=" + quoteStr(C, "cancel") +
               "WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
   runSQL(sql2, C);
+
   //get refund value
   string sql3 = "SELECT * \
                 FROM ORDERS \
@@ -227,7 +233,6 @@ void insert_order(connection *C, int order_id, int account_id, string symbol, in
                   + quoteStr(C, states) + "," 
                   +to_string(getTime())+");";
     runSQL(sql, C);
-
   }
 }
 
@@ -352,47 +357,58 @@ int add_sell_order(connection *C, int account_id, string symbol, int amount, flo
 }
 
 string add_order(connection *C, int account_id, string symbol, int amount, float price){
+  //amount<0 error
   if(amount<=0){
     return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Amount cannot be smaller or equal to 0</error>\n";
   }
-
+  //account not exist error
+  work W(*C);
   string sql1 = "SELECT ACCOUNT_ID, BALANCE FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id) + " FOR UPDATE";
-  result R=selectSQL(C, sql1);
+  result R(W.exec(sql1));
   if(R.size()==0){
     return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Account does not exist</error>\n";
   }
+  //renew type and price
   string type= "buy";
   if(price<0){
     type="sell";
     price=-price;
   }
+  
   if(type=="buy"){
     if(price*amount>=R.begin()[1].as<int>()){
+      W.commit();
       return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Not enough money</error>\n";
     }
     else{
       string sql2="UPDATE ACCOUNT \
                     SET BALANCE = BALANCE-"+to_string(price*amount)+" \
                     WHERE ACCOUNT_ID= "+ to_string(account_id);
-      runSQL(sql2,C);
+      W.exec(sql2);
+      W.commit();
       int n = add_buy_order(C, account_id, symbol, amount, price, "open");
       return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";  
     }
   }
   else{//sell
+    W.commit();
     string sql3 = "SELECT STOCK_ID, AMOUNT \
                     FROM STOCK \
                     WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + quoteStr(C,symbol)
                     + " FOR UPDATE";
-    result R2=selectSQL(C,sql3);
+    work W(*C);
+    result R2( W.exec(sql3));
+    
     if(R2.size()<1 || amount > R2.begin()[1].as<int>()){
+      W.commit();
       return "  <error sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\">Not enough stocks</error>\n";
     }
     else{
       string sql4="UPDATE STOCK \
                   SET AMOUNT = AMOUNT-"+ to_string(amount)+" \
-                  WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + quoteStr(C,symbol);
-      runSQL(sql4,C);            
+                  WHERE ACCOUNT_ID= "+ to_string(account_id) + " AND SYMBOL = " + WquoteStr(W,symbol);
+      W.exec(sql4);
+      W.commit();
       int n = add_sell_order(C, account_id, symbol, amount, price, "open");
       return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";
     }
