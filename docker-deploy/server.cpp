@@ -22,22 +22,20 @@ void Server::run(connection *C) {
     ClientData * clientdata = new ClientData(client_fd, id, "");
     id++;
     pthread_mutex_unlock(&mutex1);
-    //pthread_create(&thread, NULL, handle, clientdata);
 
     std :: string request;
     int l;
-    //char buffer[1024];
-    //memset(buffer, 0, sizeof(buffer));//clear buffer
-    //recv(client_fd, &l,  sizeof(l), 0);
-    //recv(client_fd, buffer,  l, 0);
     request = receive(client_fd, l);
-    //cout<<"\nrequestTest\n"<<request<<"\nrequestTest\n";
-    //cout<<requestToResponse(C, request)<<endl<<endl;
     string response=requestToResponse(C, request);
     l=response.length();
     send(client_fd, &l, sizeof(l), 0);
     send(client_fd, response.c_str(), l, 0);
-
+    pthread_create(&thread, NULL, handle, clientdata);
   }
   close(temp_fd);
+}
+
+void * Server::handle(void * info){
+  cout<<"hi";
+  return NULL;
 }

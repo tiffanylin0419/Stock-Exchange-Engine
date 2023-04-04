@@ -8,4 +8,5 @@ class Server {
  public:
   Server(const char * myport) : port_num(myport) {}
   void run(connection *C);
+  static void * handle(void * info);
 };
