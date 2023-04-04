@@ -448,8 +448,8 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
                     WHERE ACCOUNT_ID= "+ to_string(account_id);
       W.exec(sql2);
       W.commit();
-      //int n = add_buy_order(C, account_id, symbol, amount, price, "open");
-      //return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";  
+      int n = add_buy_order(C, account_id, symbol, amount, price, "open");
+      return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";  
       return "";
     }
   }
