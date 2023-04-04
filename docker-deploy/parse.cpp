@@ -2,40 +2,44 @@
 #define BUFF_SIZE 4096
 //std::mutex mtx;
 
-/*
-string receive(int &client_fd) {
-  char first_buffer(BUFF_SIZE);
-  std :: string response_message;
-  int data_len = recv(client_fd, &first_buffer, sizeof(buffer), 0);
+
+string receive(int &client_fd, int &l) {
+  char first_buffer[BUFF_SIZE];
+  memset(first_buffer, 0, sizeof(first_buffer));
+  std :: string request;
+
+  //start receiving!!!
+  cout << "start receiving" << endl;
+  
+  recv(client_fd, &l, sizeof(l), 0);
+  int data_len = recv(client_fd, &first_buffer, sizeof(first_buffer), 0);
   if(data_len < 0)
   {
     cerr << "Fail to receive the request." << endl;
     close(client_fd);
     return "";
   }
-  //ssize_t bytes_received = recv(client_fd, &buffer, sizeof(buffer), 0);
-  //int index = data_len;
-  std :: string str(first_buffer);
+  // print the length of the xml body
+  cout << "data_len: " << l << endl;
+  std :: string first_message(first_buffer);
+  request = first_message;
+  //get the first line of integer message size
   int xml_bytes = 0;
-  xml_bytes = stoi(str.substr(0,str.find('\n') + 1));
+  try{
+  xml_bytes = stoi(first_message.substr(0,first_message.find('\n') + 1));
   if(xml_bytes <= 0)
   {
-    cerr << "Bytes should be larger than 0." << endl;
+    cerr << "xml Bytes should be larger than 0." << endl;
     return "";
   }
-
-  cout << "=========================" << endl;
-  cout << "starting receiving" << endl;
-  cout << "data_len: " << data_len << endl;
   cout << "xml_bytes: " << xml_bytes << endl;
   bool receive_complete = false;
-  int remain_len = data_len - BUFF_SIZE;
+  int remain_len = l - BUFF_SIZE;
   // Receive whole message in the first recv
   if(data_len < BUFF_SIZE)
   {
     receive_complete = true;
     remain_len = 0;
-    response_message.append(first_buffer, data_len);
   }
   char buffer[BUFF_SIZE];
   while(!receive_complete)
@@ -45,10 +49,10 @@ string receive(int &client_fd) {
       receive_complete = true;
       break;
     }
-    int data_len = recv(client_fd, &buffer, BUFF_SIZE, 0)
+    int data_len = recv(client_fd, &buffer, sizeof(buffer), 0);
     if(data_len < 0)
     {
-      cerr << "Fail to receive the request several times." << endl;
+      cerr << "Fail to receive whole request." << endl;
       return "";
     }
     else if(data_len == 0)
@@ -59,17 +63,27 @@ string receive(int &client_fd) {
     else
     {
       remain_len -= data_len;
-      response_message.append(buffer, data_len);
+      request.append(buffer, data_len);
     }
   }
-  cout << "response_message:" << endl;
-  cout << response_message << endl;
-  cout << "Receiving done!" << endl;
-  // get rid of byte len at the beginning
-  response_message = response_message.substr(response_message.find('\n') + 1, response_message.end());
-  return response_message;
+  //get rid of first and second line of request xml
+  request = request.substr(request.find('\n') + 1);
+  request = request.substr(request.find('\n') + 1);
+  cout << "request len is:" << request.length() << endl;
+  if(xml_bytes != request.length())
+  {
+    cerr << "Wrong request format!" << endl;
+    cerr << "The first line of message size is wrong" << endl;
+      return "";
+  }
+  }catch (const std::exception& e)
+    {
+      cerr << "The first line of xml should contain the number of bytes." << endl;
+      return "";
+    }
+  return request;
 }
-*/
+
 ////////////////////////
 /*
 // send back response

@@ -27,7 +27,7 @@
 using namespace std;
 
 //////main function//////
-string receive(int &client_fd);
+string receive(int &client_fd, int &l);
 void send_response(int &client_fd, string &response_message);
 int process_create(pugi::xml_document &request_doc, string &response,connection* C);
 int process_transaction(pugi::xml_document &request_doc, string &response,connection *C);

@@ -1,6 +1,6 @@
 todo:
-    error output
-    select&update
+thread pool
+
     xml repeat: buffer overflow detected ***: terminated (not good)
     set up docker
 Q:
