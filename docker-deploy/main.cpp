@@ -30,17 +30,10 @@ int main(int argc, char *argv[])
   createTable("file/account.sql", C);
   createTable("file/stock.sql", C);
   createTable("file/order.sql", C);
-
-  /*string request=read_file_to_string("test1.xml");
-  cout<<request<<endl<<endl;
-  cout<<requestToResponse(C, request)<<endl<<endl;
-
-  request=read_file_to_string("test2.xml");
-  cout<<request<<endl<<endl;
-  cout<<requestToResponse(C, request)<<endl<<endl;*/
+  C->disconnect();
 
   const char * port = PORT;
   Server * myServer = new Server(port);
-  myServer->run(C);
+  myServer->run();
   return 0;
 }
