@@ -1,9 +1,9 @@
 #include "server.h"
 #include "client_data.h"
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
-//int totalConnect=0;
 
-void Server::run() {
+
+void Server::run(connection *C) {
   int temp_fd = setup_server(this->port_num);
   if (temp_fd == -1) {
     return;
@@ -22,41 +22,22 @@ void Server::run() {
     ClientData * clientdata = new ClientData(client_fd, id, "");
     id++;
     pthread_mutex_unlock(&mutex1);
-    pthread_create(&thread, NULL, handle, clientdata);
+    //pthread_create(&thread, NULL, handle, clientdata);
+
+    std :: string request;
+    int l;
+    //char buffer[1024];
+    //memset(buffer, 0, sizeof(buffer));//clear buffer
+    //recv(client_fd, &l,  sizeof(l), 0);
+    //recv(client_fd, buffer,  l, 0);
+    request = receive(client_fd, l);
+    //cout<<"\nrequestTest\n"<<request<<"\nrequestTest\n";
+    //cout<<requestToResponse(C, request)<<endl<<endl;
+    string response=requestToResponse(C, request);
+    l=response.length();
+    send(client_fd, &l, sizeof(l), 0);
+    send(client_fd, response.c_str(), l, 0);
+
   }
   close(temp_fd);
-}
-
-
-
-void * handle(void * info) {
-  ClientData * clientdata = (ClientData *)info;
-  int client_fd = clientdata->client_fd;
-  char buffer[BUFFER_LEN] = {0};
-
-  std :: string request;
-  int l;
-  request = receive(client_fd, l);
-  connection *C;
-  try{ 
-    C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
-    if (C->is_open()) {
-    } else {
-      cout << "Can't open database" << endl;
-      return 1;
-    } 
-  } catch (const std::exception &e){
-    cerr << e.what() << std::endl;
-    return 1;
-  }
-  
-  string response=requestToResponse(C, request);
-  C.disconnect ();
-  l=response.length();
-  send(client_fd, &l, sizeof(l), 0);
-  send(client_fd, response.c_str(), l, 0);
-
-  close(server_fd);
-  close(client_fd);
-  return NULL;
 }

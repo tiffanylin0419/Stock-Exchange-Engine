@@ -7,5 +7,5 @@ class Server {
 
  public:
   Server(const char * myport) : port_num(myport) {}
-  void run();
+  void run(connection *C);
 };
