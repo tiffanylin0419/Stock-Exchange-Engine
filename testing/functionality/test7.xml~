@@ -1,6 +1,0 @@
-
-<transactions id="2">
-  <!--buy exact num-->    
-  <order sym="g" amount="2" limit="-99"/><!--6-->   
-  <order sym="k" amount="2" limit="99"/><!--7-->   
-</transactions>
