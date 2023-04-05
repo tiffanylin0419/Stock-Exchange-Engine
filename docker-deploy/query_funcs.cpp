@@ -6,9 +6,9 @@ void runSQL(string sql, connection *C){
   W.commit();
 }
 
-result selectSQL(connection *C, string sql){
-  nontransaction N(*C);
-  result R( N.exec( sql ));
+
+result selectSQL(work &W, string sql){
+  result R( W.exec( sql ));
   return R;
 }
 
@@ -52,7 +52,10 @@ string add_account(connection *C, int account_id, float balance){
     return "  <error id=\""+to_string(account_id)+"\">Balance cannot be smaller or equal to 0</error>\n";
   }
   string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ to_string(account_id);
-  result R=selectSQL(C, sql1);
+  work W(*C);
+  result R=selectSQL(W, sql1);
+  W.commit();
+  
   if(R.size()!=0){
     return "  <error id=\""+to_string(account_id)+"\">Account already exists</error>\n";
   }
@@ -73,7 +76,9 @@ string add_stock(connection *C, int account_id, string symbol, int amount){
   }
   //check account exist
   string sql1 = "SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID= "+ quoteStr(C, to_string(account_id));
-  result R=selectSQL(C, sql1 );
+  work W(*C);
+  result R=selectSQL(W, sql1);
+  W.commit();
   if(R.size()==0){
     return "    <error sym=\""+to_string(symbol)+"\" id=\""+to_string(account_id)+"\">Account does not exist</error>\n";
   }
@@ -151,7 +156,9 @@ string query_error(connection *C, int order_id){
   string sql1 = "SELECT * \
                 FROM ORDERS \
                 WHERE ORDER_ID = " + to_string(order_id);
-  result R=selectSQL(C, sql1);
+  work W(*C);
+  result R=selectSQL(W, sql1);
+  W.commit();
 
   if(R.size()==0){
     return "  <error id=\""+to_string(order_id)+"\">No such trans_id</error>\n";
@@ -207,7 +214,9 @@ string cancel(connection *C, int account_id, int order_id){
   string sql1 = "SELECT * \
                 FROM ORDERS \
                 WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "open");
-  result R=selectSQL(C, sql1);
+  work W(*C);
+  result R=selectSQL(W, sql1);
+  W.commit();
   if(R.size()<=0){
     return "  <canceled id=\""+to_string(order_id)+"\">\n" + query_body(C,order_id) + "  </canceled>\n";
   }
@@ -225,7 +234,9 @@ string cancel(connection *C, int account_id, int order_id){
   string sql3 = "SELECT * \
                 FROM ORDERS \
                 WHERE ORDER_ID = " + to_string(order_id) + " AND STATES = " + quoteStr(C, "cancel");
-  result R2=selectSQL(C, sql3);
+  work W1(*C);
+  result R2=selectSQL(W1, sql3);
+  W1.commit();
   //refund
   if(R[0][5].as<string>()=="buy"){
     refundMoney(C, R2[0][1].as<int>(), R2[0][3].as<int>()*R2[0][4].as<float>());
@@ -448,8 +459,8 @@ string add_order(connection *C, int account_id, string symbol, int amount, float
                     WHERE ACCOUNT_ID= "+ to_string(account_id);
       W.exec(sql2);
       W.commit();
-      int n = add_buy_order(C, account_id, symbol, amount, price, "open");
-      return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";  
+      //int n = add_buy_order(C, account_id, symbol, amount, price, "open");
+      //return "  <opened sym=\""+to_string(symbol)+"\" amount=\""+to_string(amount)+"\" limit=\""+to_string(static_cast<int>(price))+"\" id=\""+to_string(n)+"\"/>\n";  
       return "";
     }
   }
