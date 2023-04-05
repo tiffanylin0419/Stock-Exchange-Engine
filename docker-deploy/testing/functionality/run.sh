@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-n=2
+n=10
 
 # Loop through the numbers from 1 to n
 for ((i=1; i<=n; i++))

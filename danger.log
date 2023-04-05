@@ -1,21 +1,16 @@
-todo:
-    xml repeat: buffer overflow detected ***: terminated (not good)
-    set up docker
-check:
-    want server to run forever: cannot return -1 in main
+want server to run forever: cannot return -1 in main
 
-done: 
-    limit (save float, print int)
-    price and balance is float
-    condition check, ex. >0
-    parallel: 有人要cancel, order先改成cancel就不怕另一個人買走
-    cancel refund
-    cancel twice no refund
-    sell get money, buy get stock
-    buy then sell: return price difference to buyer
-    When cancel the order, verify that this transaction we are cancelling is created by the account_id
-    add Row level locking for parallize
-    limit connection number to postgres to 90, postgres has a maximum of 100
-    
+limit (save float, print int)
+price and balance is float
+condition check, ex. >0
+parallel: 有人要cancel, order先改成cancel就不怕另一個人買走
+cancel refund
+cancel twice no refund
+sell get money, buy get stock
+buy then sell: return price difference to buyer
+When cancel the order, verify that this transaction we are cancelling is created by the account_id
+add Row level locking for parallize
+limit connection number to postgres to 90, postgres has a maximum of 100
+
     
 
