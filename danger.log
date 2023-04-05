@@ -1,12 +1,6 @@
 todo:
-thread pool
-
     xml repeat: buffer overflow detected ***: terminated (not good)
     set up docker
-Q:
-    control connection number
-    latency & throughput
-
 check:
     want server to run forever: cannot return -1 in main
 
@@ -21,5 +15,7 @@ done:
     buy then sell: return price difference to buyer
     When cancel the order, verify that this transaction we are cancelling is created by the account_id
     add Row level locking for parallize
+    limit connection number to postgres to 90, postgres has a maximum of 100
+    
     
 

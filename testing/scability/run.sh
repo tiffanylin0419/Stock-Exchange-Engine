@@ -2,7 +2,7 @@
 #!/bin/bash
 
 fileNum=10
-maxThread=50
+maxThread=100
 start=$(date +%s.%N)
 
 
