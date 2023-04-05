@@ -36,7 +36,9 @@ void * Server::handle(void * info){
   int l;
   request = receive(client_fd, l);
 
-  while(Server::connected>90){}
+  while(Server::connected>90){
+    cout<<"stuck";
+  }
 
   pthread_mutex_lock(&mutex1);
   Server::connected++;

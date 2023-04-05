@@ -38,5 +38,6 @@ int main(int argc, char * argv[]) {
   recv(server_fd, &l,  sizeof(l), 0);
   recv(server_fd, buffer,  l, 0);
   cout<<buffer<<endl;
+  
   exit(EXIT_SUCCESS);
 }

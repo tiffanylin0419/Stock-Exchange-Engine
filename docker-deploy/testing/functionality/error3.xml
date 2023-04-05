@@ -1,0 +1,32 @@
+726
+<?xml version="1.0" encoding="UTF-8"?>
+<create>
+  <!--add account-->
+  <account id="a" balance="40"/>
+  <account id="2" balance="304"/>
+  <account id="3" balance="30400"/>
+  <account id="4" balance="30400"/>
+  <!--add account fail-->
+  <account id="1" balance="32"/>
+  <account id="9" balance="0"/>
+  <account id="9" balance="-1"/>
+  <!--add stock-->
+  <symbol sym="a">
+    <account id="1">3</account>
+  </symbol>
+  <symbol sym="b">
+    <account id="1">7</account>
+  </symbol>
+  <symbol sym="c">
+    <account id="2">9</account>
+    <account id="3">9</account>
+    <account id="3">10</account>
+  </symbol>
+  <!--add stock fail-->
+  <symbol sym="a">
+    <account id="6">3</account>
+  </symbol>
+  <symbol sym="c">
+    <account id="3">0</account>
+  </symbol>
+</create>
