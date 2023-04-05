@@ -26,7 +26,7 @@ int main(int argc, char * argv[]) {
   //connect to server
   //int server_fd = setup_client(argv[1], argv[2]);
 
-  int server_fd = setup_client("127.0.0.1", "12345");
+  int server_fd = setup_client("vcm-32279.vm.duke.edu", "12345");
 
   string request=read_file_to_string(argv[1]);
   int l=request.length();
