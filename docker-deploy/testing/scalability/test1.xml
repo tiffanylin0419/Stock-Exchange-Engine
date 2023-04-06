@@ -1,9 +1,11 @@
-726
+777
 <?xml version="1.0" encoding="UTF-8"?>
 <create>
   <!--add account-->
-  <account id="a" balance="40"/>
-  <account id="2" balance="304"/>
+  <account id="1" balance="400000"/>
+  <account id="2" balance="3040000"/>
+  <account id="3" balance="3040000"/>
+  <account id="4" balance="3040000"/>
   <!--add account fail-->
   <account id="1" balance="32"/>
   <account id="9" balance="0"/>
@@ -14,6 +16,11 @@
   </symbol>
   <symbol sym="b">
     <account id="1">7</account>
+  </symbol>
+  <symbol sym="c">
+    <account id="2">9</account>
+    <account id="3">9</account>
+    <account id="3">10</account>
   </symbol>
   <!--add stock fail-->
   <symbol sym="a">

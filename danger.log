@@ -1,16 +1,16 @@
-want server to run forever: cannot return -1 in main
+Done
+1. server to run forever: cannot return -1 in main
+2. limit save with float, print with int
+3. condition check, ex. >0
+4. add Row level locking for parallize
+5. cancel refund, cancel twice no refund, sell get money, buy get stock
+6. buy then sell: return price difference to buyer
+7. When cancel the order, verify that this transaction we are cancelling is created by the account_id
+8. limit connection number to postgres to 90, postgres has a maximum of 100
 
-limit (save float, print int)
-price and balance is float
-condition check, ex. >0
-parallel: 有人要cancel, order先改成cancel就不怕另一個人買走
-cancel refund
-cancel twice no refund
-sell get money, buy get stock
-buy then sell: return price difference to buyer
-When cancel the order, verify that this transaction we are cancelling is created by the account_id
-add Row level locking for parallize
-limit connection number to postgres to 90, postgres has a maximum of 100
-
+Not done
+1.  can not handle input with wrong format.
+2.  may be attacked by SQL injection, or DDOS.
+3.  If there is too much connect at the same time, our server will crash.
     
 

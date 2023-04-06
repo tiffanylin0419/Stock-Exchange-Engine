@@ -33,13 +33,13 @@ int process_create(pugi::xml_document &request_doc, string &response,connection*
 int process_transaction(pugi::xml_document &request_doc, string &response,connection *C);
 
 //////small function/////
-int getAccount_ID(pugi::xml_node &child);
-float getBalance(pugi::xml_node &child);
-std :: string getSym(pugi::xml_node &child);
-int getNum(pugi::xml_node &acc);
-int getAmount(pugi::xml_node &child);
-float getLimit(pugi::xml_node &child);
-int getTrans_ID(pugi::xml_node &child);
+int getAccount_ID(pugi::xml_node &child, int& flag);
+float getBalance(pugi::xml_node &child, int& flag);
+std :: string getSym(pugi::xml_node &child,int& flag);
+int getNum(pugi::xml_node &acc,int& flag);
+int getAmount(pugi::xml_node &child,int& flag);
+float getLimit(pugi::xml_node &child,int& flag);
+int getTrans_ID(pugi::xml_node &child,int& flag);
 
 string requestToResponse(connection *C, string request);
 #endif

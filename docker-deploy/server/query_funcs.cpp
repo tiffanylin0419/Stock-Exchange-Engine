@@ -62,8 +62,8 @@ string add_account(connection *C, int account_id, float balance){
   //insert if does not exist
   string sql2 = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) SELECT " 
                 + to_string(account_id) + "," 
-                + to_string(balance) + ""
-                +"WHERE NOT EXISTS (SELECT 1 FROM ACCOUNT WHERE ACCOUNT_ID=" + to_string(account_id) + ");";
+                + to_string(balance) 
+                +" WHERE NOT EXISTS (SELECT 1 FROM ACCOUNT WHERE ACCOUNT_ID=" + to_string(account_id) + ");";
   runSQL(sql2,C);
   return "  <created id=\""+to_string(account_id)+"\"/>\n";
 }

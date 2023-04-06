@@ -46,7 +46,10 @@ void * Server::handle(void * info){
 
   connection *C;
   try{ 
-    C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
+    //docker
+    C = new connection("dbname=postgres user=postgres password=passw0rd host=db port=5432");
+    //no docker
+    //C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
     if (C->is_open()) {
     } else {
       cout << "Can't open database" << endl;

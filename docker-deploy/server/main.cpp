@@ -8,12 +8,14 @@
 #define PORT "12345"
 
 
-
 int main(int argc, char *argv[])
 {
   connection *C;
   try{ 
-    C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
+    //docker
+    C = new connection("dbname=postgres user=postgres password=passw0rd host=db port=5432");  
+    //my
+    //C = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
     if (C->is_open()) {
     } else {
       cout << "Can't open database" << endl;
@@ -33,20 +35,6 @@ int main(int argc, char *argv[])
   C->disconnect();
 
   
-  /*for(int i=0;i<3;i++){
-    connection *C4;
-    try{ 
-      C4 = new connection("dbname=EXCHANGE_SERVER user=postgres password=passw0rd");
-      if (C4->is_open()) {
-      } else {
-        cout << "Can't open database" << endl;
-        return 1;
-      } 
-    } catch (const std::exception &e){
-      cerr << e.what() << std::endl;
-      return 1;
-    }
-  }*/
 
   const char * port = PORT;
   Server * myServer = new Server(port);
