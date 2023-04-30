@@ -1,5 +1,5 @@
 #include "parse.hpp"
-#define BUFF_SIZE 4096
+#define BUFF_SIZE 6500
 //std::mutex mtx;
 
 
@@ -11,7 +11,7 @@ string receive(int &client_fd, int &l) {
   //start receiving!!!
   //cout << "start receiving" << endl;
   
-  recv(client_fd, &l, sizeof(l), 0);
+  //recv(client_fd, &l, sizeof(l), 0);
   int data_len = recv(client_fd, &first_buffer, sizeof(first_buffer), 0);
   if(data_len < 0)
   {
@@ -19,72 +19,63 @@ string receive(int &client_fd, int &l) {
     close(client_fd);
     return "";
   }
-  // print the length of the xml body
-  //cout << "data_len: " << l << endl;
   std :: string first_message(first_buffer);
   request = first_message;
   //get the first line of integer message size
   int xml_bytes = 0;
   try{
-  xml_bytes = stoi(first_message.substr(0,first_message.find('\n') + 1));
-  if(xml_bytes <= 0)
-  {
-    cerr << "xml Bytes should be larger than 0." << endl;
-    return "";
-  }
-  //cout << "xml_bytes: " << xml_bytes << endl;
-  bool receive_complete = false;
-  int remain_len = l - BUFF_SIZE;
-  // Receive whole message in the first recv
-  if(data_len < BUFF_SIZE)
-  {
-    receive_complete = true;
-    remain_len = 0;
-  }
-  char buffer[BUFF_SIZE];
-  while(!receive_complete)
-  {
-    if(remain_len <= 0)
+    /*xml_bytes = stoi(first_message.substr(0,first_message.find('\n') + 1));
+    if(xml_bytes <= 0)
     {
-      receive_complete = true;
-      break;
-    }
-    int data_len = recv(client_fd, &buffer, sizeof(buffer), 0);
-    if(data_len < 0)
-    {
-      cerr << "Fail to receive whole request." << endl;
+      cerr << "xml Bytes should be larger than 0." << endl;
       return "";
-    }
-    else if(data_len == 0)
+    }*/
+    //cout << "xml_bytes: " << xml_bytes << endl;
+    bool receive_complete = false;
+    int remain_len = l - BUFF_SIZE;
+    // Receive whole message in the first recv
+    if(data_len < BUFF_SIZE)
     {
       receive_complete = true;
-      break;
+      remain_len = 0;
     }
-    else
+    char buffer[BUFF_SIZE];
+    while(!receive_complete)
     {
-      remain_len -= data_len;
-      request.append(buffer, data_len);
+      if(remain_len <= 0)
+      {
+        receive_complete = true;
+        break;
+      }
+      int data_len = recv(client_fd, &buffer, sizeof(buffer), 0);
+      if(data_len < 0)
+      {
+        cerr << "Fail to receive whole request." << endl;
+        return "";
+      }
+      else if(data_len == 0)
+      {
+        receive_complete = true;
+        break;
+      }
+      else
+      {
+        remain_len -= data_len;
+        request.append(buffer, data_len);
+      }
     }
-  }
-  //get rid of first and second line of request xml
-  size_t index = request.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-  if(index == string :: npos)
-    {
+    //get rid of first and second line of request xml
+    size_t index = request.find("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    if(index == string :: npos){
       cerr << "The version and encoding should be contained" << endl;
       return "";
     }
-  request = request.substr(request.find('\n') + 1);
-  //if(xml_bytes != request.length())
-  //{
-  //cerr << "Wrong request format!" << endl;
-  //cerr << "The first line of message size is wrong" << endl;
-  //return "";
-  //}
-  }catch (const std::exception& e)
-    {
-      cerr << "The first line of xml should contain the number of bytes." << endl;
-      return "";
-    }
+    request = request.substr(request.find('\n') + 1);
+  }
+  catch (const std::exception& e){
+    cerr << "The first line of xml should contain the number of bytes." << endl;
+    return "";
+  }
   return request;
 }
 
@@ -134,10 +125,10 @@ void send_response(int &client_fd, string &response_message) {
 int getAccount_ID(pugi::xml_node &child, int& flag)
 {
   int account_id = 0;
-  try 
-  {
+  try {
     account_id = std::stoi(child.first_attribute().value());
-  }catch (const std::exception& e){
+  }
+  catch (const std::exception& e){
     std::cerr << "Error: " << "The account_id should be number." << std::endl;
     flag = -1;
     return account_id;

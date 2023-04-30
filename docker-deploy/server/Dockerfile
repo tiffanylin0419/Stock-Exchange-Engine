@@ -11,5 +11,6 @@ RUN apt-get -y install gcc g++
 RUN apt-get -y install postgresql postgresql-contrib
 RUN apt-get -y install build-essential libpqxx-dev libpq-dev bc libpugixml-dev
 
+RUN make clean && make
 RUN chmod u+r+x run.sh
 

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results>
+  <error id="11">Account already exists</error>
+  <created sym="SPY" id="11"/>
+</results>

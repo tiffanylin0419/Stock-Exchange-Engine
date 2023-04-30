@@ -1,4 +1,10 @@
 
+make clean
+
+
+
+make
+
 #!/bin/bash
 
 fileNum=10

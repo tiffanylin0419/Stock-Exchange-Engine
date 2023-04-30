@@ -3,6 +3,9 @@
 fileNum=10
 maxThread=10
 
+
+make
+
 for ((i=1; i<=fileNum; i++))
 do
     start=$(date +%s.%N)

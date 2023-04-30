@@ -67,9 +67,9 @@ void * Server::handle(void * info){
   pthread_mutex_unlock(&mutex1);
 
   l=response.length();
-  send(client_fd, &l, sizeof(l), 0);
+  //send(client_fd, &l, sizeof(l), 0);
   send(client_fd, response.c_str(), l, 0);
-
+  std::cout<<response.c_str()<<endl;
   close(client_fd);
   return NULL;
 }

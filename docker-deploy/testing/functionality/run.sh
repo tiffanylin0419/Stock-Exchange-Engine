@@ -1,4 +1,12 @@
 
+make clean
+
+
+
+make
+
+
+
 #!/bin/bash
 
 n=10
